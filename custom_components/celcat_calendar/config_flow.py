@@ -180,6 +180,14 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
     ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                options=user_input
+            )
+            self.hass.async_create_task(
+                self.hass.config_entries.async_reload(self.config_entry.entry_id)
+            )
+
             return self.async_create_entry(data=user_input)
 
         return self.async_show_form(
