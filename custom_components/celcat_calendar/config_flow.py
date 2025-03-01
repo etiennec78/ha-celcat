@@ -14,12 +14,13 @@ from celcat_scraper import (
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
-from homeassistant.const import CONF_NAME, CONF_URL, CONF_USERNAME, CONF_PASSWORD
+from homeassistant.config_entries import ConfigFlow, ConfigFlowResult, OptionsFlowWithConfigEntry
+from homeassistant.const import CONF_NAME, CONF_URL, CONF_USERNAME, CONF_PASSWORD, CONF_SCAN_INTERVAL
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN, DEFAULT_NAME
+from .const import DOMAIN, DEFAULT_NAME, DEFAULT_SCAN_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,6 +36,12 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 STEP_REAUTH_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_PASSWORD): str,
+    }
+)
+
+OPTIONS_SCHEMA = vol.Schema(
+    {
+        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
     }
 )
 
@@ -147,3 +154,29 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
             await celcat.close()
 
         return errors
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: ConfigEntry,
+    ) -> OptionsFlowHandler:
+        """Create the options flow."""
+        return OptionsFlowHandler(config_entry)
+
+
+class OptionsFlowHandler(OptionsFlowWithConfigEntry):
+    """Handle options flow."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA, self.config_entry.options
+            ),
+        )

@@ -13,7 +13,7 @@ from celcat_scraper import (
 )
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import (
@@ -40,7 +40,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             hass,
             _LOGGER,
             name=entry.data[CONF_NAME],
-            update_interval=timedelta(hours=DEFAULT_SCAN_INTERVAL),
+            update_interval=timedelta(hours=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)),
             update_method=self._async_update_data,
             always_update=False,
         )

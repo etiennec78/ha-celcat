@@ -40,6 +40,15 @@
       }
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scan Interval (hours)"
+        }
+      }
+    }
+  },
   "system_health": {
     "info": {
       "reachable_instances": "Reachable instances",
