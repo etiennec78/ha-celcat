@@ -25,8 +25,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: CelcatConfigEntry) -> bo
             username=entry.data[CONF_USERNAME],
             password=entry.data[CONF_PASSWORD],
             include_holidays=entry.options.get(
-                CONF_SHOW_HOLIDAYS,
-                DEFAULT_SHOW_HOLIDAYS
+                CONF_SHOW_HOLIDAYS, DEFAULT_SHOW_HOLIDAYS
             ),
             rate_limit=0.1,
             session=async_get_clientsession(hass),

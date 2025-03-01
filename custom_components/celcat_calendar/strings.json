@@ -46,7 +46,8 @@
       "init": {
         "data": {
           "scan_interval": "Scan Interval (hours)",
-          "show_holidays": "Show holidays"
+          "show_holidays": "Show holidays",
+          "group_events": "Group events"
         }
       }
     }

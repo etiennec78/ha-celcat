@@ -5,6 +5,7 @@ import logging
 
 import async_timeout
 from dataclasses import dataclass
+from typing import Any
 
 from celcat_scraper import (
     CelcatScraperAsync,
@@ -22,7 +23,12 @@ from homeassistant.helpers.update_coordinator import (
 )
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
+from .const import (
+    DOMAIN,
+    DEFAULT_SCAN_INTERVAL,
+    CONF_GROUP_EVENTS,
+    DEFAULT_GROUP_EVENTS,
+)
 from .store import CelcatStore
 
 _LOGGER = logging.getLogger(__name__)
@@ -40,13 +46,16 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             hass,
             _LOGGER,
             name=entry.data[CONF_NAME],
-            update_interval=timedelta(hours=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)),
+            update_interval=timedelta(
+                hours=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+            ),
             update_method=self._async_update_data,
             always_update=False,
         )
         data = entry.runtime_data
         self.celcat: CelcatScraperAsync = data.client
         self._store: CelcatStore = data.store
+        self.options = entry.options
 
     async def _async_update_data(self) -> list[dict]:
         """Update data via library."""
@@ -92,7 +101,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             await self.celcat.close()
             await self._store.async_save(events)
 
-            return [
+            tz_events = [
                 {
                     **event,
                     "start": dt_util.as_local(event["start"]),
@@ -100,6 +109,21 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
                 }
                 for event in events
             ]
+
+            return await self._group_events(tz_events)
+
+    async def _group_events(self, events) -> dict[str, list[dict[str, Any]]]:
+        """Group events by courses."""
+        grouped_events = {"all": events}
+
+        if self.options.get(CONF_GROUP_EVENTS, DEFAULT_GROUP_EVENTS):
+            for event in events:
+                group = event.get("category", "") + (
+                    f" {event['course']}" if event.get("course") else ""
+                )
+                grouped_events[group] = grouped_events.get(group, []) + [event]
+
+        return grouped_events
 
 
 @dataclass

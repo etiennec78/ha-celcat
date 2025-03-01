@@ -14,8 +14,19 @@ from celcat_scraper import (
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlowWithConfigEntry
-from homeassistant.const import CONF_NAME, CONF_URL, CONF_USERNAME, CONF_PASSWORD, CONF_SCAN_INTERVAL
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlowWithConfigEntry,
+)
+from homeassistant.const import (
+    CONF_NAME,
+    CONF_URL,
+    CONF_USERNAME,
+    CONF_PASSWORD,
+    CONF_SCAN_INTERVAL,
+)
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import BooleanSelector
@@ -26,7 +37,9 @@ from .const import (
     DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
     CONF_SHOW_HOLIDAYS,
-    DEFAULT_SHOW_HOLIDAYS
+    CONF_GROUP_EVENTS,
+    DEFAULT_SHOW_HOLIDAYS,
+    DEFAULT_GROUP_EVENTS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,7 +62,12 @@ STEP_REAUTH_DATA_SCHEMA = vol.Schema(
 OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
-        vol.Optional(CONF_SHOW_HOLIDAYS, default=DEFAULT_SHOW_HOLIDAYS): BooleanSelector(),
+        vol.Optional(
+            CONF_SHOW_HOLIDAYS, default=DEFAULT_SHOW_HOLIDAYS
+        ): BooleanSelector(),
+        vol.Optional(
+            CONF_GROUP_EVENTS, default=DEFAULT_GROUP_EVENTS
+        ): BooleanSelector(),
     }
 )
 
@@ -109,7 +127,9 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def async_step_reconfigure(self, user_input: dict[str, Any]) -> ConfigFlowResult:
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any]
+    ) -> ConfigFlowResult:
         """Handle reconfiguration of the integration."""
         errors: dict[str, str] = {}
         reconfigure_entry = self._get_reconfigure_entry()
@@ -129,7 +149,9 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
         data[CONF_PASSWORD] = ""
         return self.async_show_form(
             step_id="reconfigure",
-            data_schema=self.add_suggested_values_to_schema(STEP_USER_DATA_SCHEMA, data),
+            data_schema=self.add_suggested_values_to_schema(
+                STEP_USER_DATA_SCHEMA, data
+            ),
             errors=errors,
         )
 
@@ -181,8 +203,7 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
         """Manage the options."""
         if user_input is not None:
             self.hass.config_entries.async_update_entry(
-                self.config_entry,
-                options=user_input
+                self.config_entry, options=user_input
             )
             self.hass.async_create_task(
                 self.hass.config_entries.async_reload(self.config_entry.entry_id)

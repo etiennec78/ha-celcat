@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from collections import defaultdict
 from datetime import datetime, time
 from typing import Any
 import logging
@@ -29,14 +30,14 @@ async def async_setup_entry(
     """Set up the celcat calendar platform."""
     coordinator = entry.runtime_data.coordinator
 
-    async_add_entities(
-        [
-            CelcatCalendarEntity(
-                coordinator=coordinator, entry_id=entry.entry_id, name=None
-            )
-        ],
-        True,
-    )
+    entities = [
+        CelcatCalendarEntity(
+            coordinator=coordinator, entry_id=entry.entry_id, category=category
+        )
+        for category in coordinator.data
+    ]
+
+    async_add_entities(entities, True)
 
 
 class CelcatCalendarEntity(CalendarEntity):
@@ -48,24 +49,26 @@ class CelcatCalendarEntity(CalendarEntity):
         self,
         coordinator: CelcatDataUpdateCoordinator,
         entry_id: str,
-        name: str,
+        category: str,
     ) -> None:
         """Initialize Celcat."""
         self.coordinator = coordinator
-        self._attr_unique_id = f"{entry_id}-calendar"
+        self._attr_unique_id = (
+            entry_id + (f"-{category}" if category != "all" else "") + "-calendar"
+        )
         self._attr_has_entity_name = True
-        self._attr_name = name
+        self._attr_name = None if category == "all" else category
         self._attr_device_info = DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, entry_id)},
             manufacturer="Celcat",
         )
+        self.category = category
 
     @property
     def event(self) -> CalendarEvent | None:
         """Return the next upcoming event."""
-
-        events = self.coordinator.data
+        events = self.coordinator.data.get(self.category, [])
 
         if not events:
             return None
@@ -82,7 +85,7 @@ class CelcatCalendarEntity(CalendarEntity):
         end_date: datetime,
     ) -> list[CalendarEvent]:
         """Return calendar events within a datetime range."""
-        if not self.coordinator.data:
+        if not self.coordinator.data.get(self.category):
             return []
 
         events = []
@@ -97,7 +100,7 @@ class CelcatCalendarEntity(CalendarEntity):
         range_start = start
         range_end = end
 
-        for event in self.coordinator.data or []:
+        for event in self.coordinator.data.get(self.category, []):
             event_start = (
                 event["start"]
                 if isinstance(event["start"], datetime)
