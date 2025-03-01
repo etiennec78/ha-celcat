@@ -1,0 +1,12 @@
+{
+  "domain": "celcat_calendar",
+  "name": "Celcat Calendar",
+  "integration_type": "service",
+  "codeowners": ["@etiennec78"],
+  "config_flow": true,
+  "documentation": "https://github.com/etiennec78/ha-celcat",
+  "issue_tracker": "https://github.com/etiennec78/ha-celcat/issues",
+  "iot_class": "cloud_polling",
+  "requirements": ["celcat-scraper==0.1.0"],
+  "version": "0.1.0"
+}
