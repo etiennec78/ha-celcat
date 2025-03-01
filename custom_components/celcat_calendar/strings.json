@@ -29,5 +29,11 @@
         }
       }
     }
+  },
+  "system_health": {
+    "info": {
+      "reachable_instances": "Reachable instances",
+      "total_events": "Total events"
+    }
   }
 }
