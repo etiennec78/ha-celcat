@@ -32,6 +32,12 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     }
 )
 
+STEP_REAUTH_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_PASSWORD): str,
+    }
+)
+
 
 class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Celcat Calendar."""
@@ -45,8 +51,8 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            self._username = user_input[CONF_USERNAME].lower()
-            await self.async_set_unique_id(self._username)
+            username = user_input[CONF_USERNAME].lower()
+            await self.async_set_unique_id(username)
             self._abort_if_unique_id_configured()
 
             if not (errors := await self._validate_input(user_input)):
@@ -58,7 +64,7 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
 
-    async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
+    async def async_step_reauth(self, user_input: dict[str, Any]) -> ConfigFlowResult:
         """Perform reauth upon an API authentication error."""
         self.reauth_entry = self.hass.config_entries.async_get_entry(
             self.context["entry_id"]
@@ -84,11 +90,7 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="reauth_confirm",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_PASSWORD): str,
-                }
-            ),
+            data_schema=STEP_REAUTH_DATA_SCHEMA,
             errors=errors,
         )
 
