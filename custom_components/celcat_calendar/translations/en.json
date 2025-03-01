@@ -1,0 +1,39 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Account is already configured",
+            "reauth_successful": "Re-authentication was successful"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "invalid_url": "Invalid URL",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "reauth_confirm": {
+                "data": {
+                    "password": "Password"
+                },
+                "description": "The Celcat Calendar integration needs to re-authenticate your account",
+                "title": "Authentication expired for {name}"
+            },
+            "user": {
+                "data": {
+                    "name": "Name",
+                    "password": "Password",
+                    "url": "URL",
+                    "username": "Username"
+                },
+                "description": "Enter your Celcat Calendar credentials",
+                "title": "Celcat Calendar"
+            }
+        }
+    },
+    "system_health": {
+        "info": {
+            "reachable_instances": "Reachable instances",
+            "total_events": "Total events"
+        }
+    }
+}

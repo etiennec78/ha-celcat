@@ -1,0 +1,39 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Le compte est déjà configuré",
+      "reauth_successful": "La réauthentification a réussi"
+    },
+    "error": {
+      "cannot_connect": "Échec de la connexion",
+      "invalid_auth": "Authentification invalide",
+      "unknown": "Erreur inattendue",
+      "invalid_url": "URL invalide"
+    },
+    "step": {
+      "user": {
+        "title": "Celcat Calendar",
+        "description": "Entez vos identifiants Celcat Calendar",
+        "data": {
+          "name": "Nom du calendrier",
+          "url": "URL",
+          "username": "Utilisateur",
+          "password": "Mot de passe"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reconnectez-vous à Celcat Calendar",
+        "description": "L'intégration Celcat Calendar a besoin de ré-authentifier votre compte",
+        "data": {
+          "password": "Mot de passe"
+        }
+      }
+    }
+  },
+  "system_health": {
+    "info": {
+      "reachable_instances": "Instances joignables",
+      "total_events": "Total d'événements"
+    }
+  }
+}
