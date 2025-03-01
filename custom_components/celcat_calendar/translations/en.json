@@ -27,6 +27,16 @@
         "data": {
           "password": "Password"
         }
+      },
+      "reconfigure": {
+        "title": "[%key:config::step::user::title%]",
+        "description": "Reconfigure your Celcat Calendar",
+        "data": {
+          "name": "Calendar name",
+          "url": "URL",
+          "username": "Username",
+          "password": "Password"
+        }
       }
     }
   },

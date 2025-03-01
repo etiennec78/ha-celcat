@@ -27,6 +27,16 @@
         "data": {
           "password": "[%key:common::config_flow::data::password%]"
         }
+      },
+      "reconfigure": {
+        "title": "[%key:config::step::user::title%]",
+        "description": "Reconfigure your Celcat Calendar",
+        "data": {
+          "name": "[%key:common::config_flow::data::name%]",
+          "url": "[%key:common::config_flow::data::url%]",
+          "username": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:common::config_flow::data::password%]"
+        }
       }
     }
   },

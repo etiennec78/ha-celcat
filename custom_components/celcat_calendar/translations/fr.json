@@ -27,6 +27,16 @@
         "data": {
           "password": "Mot de passe"
         }
+      },
+      "reconfigure": {
+        "title": "Celcat Calendar",
+        "description": "Reconfigurez votre Celcat Calendar",
+        "data": {
+          "name": "Nom du calendrier",
+          "url": "URL",
+          "username": "Utilisateur",
+          "password": "Mot de passe"
+        }
       }
     }
   },
