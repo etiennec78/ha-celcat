@@ -45,7 +45,8 @@
     "step": {
       "init": {
         "data": {
-          "scan_interval": "Intervalle de rafraîchissement (heures)"
+          "scan_interval": "Intervalle de rafraîchissement (heures)",
+          "show_holidays": "Afficher les vacances"
         }
       }
     }

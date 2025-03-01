@@ -8,7 +8,7 @@ from homeassistant.const import Platform, CONF_PASSWORD, CONF_URL, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN
+from .const import DOMAIN, CONF_SHOW_HOLIDAYS, DEFAULT_SHOW_HOLIDAYS
 from .coordinator import CelcatDataUpdateCoordinator, CelcatData, CelcatConfigEntry
 from .store import CelcatStore
 
@@ -24,7 +24,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: CelcatConfigEntry) -> bo
             url=entry.data[CONF_URL],
             username=entry.data[CONF_USERNAME],
             password=entry.data[CONF_PASSWORD],
-            include_holidays=False,
+            include_holidays=entry.options.get(
+                CONF_SHOW_HOLIDAYS,
+                DEFAULT_SHOW_HOLIDAYS
+            ),
             rate_limit=0.1,
             session=async_get_clientsession(hass),
         )

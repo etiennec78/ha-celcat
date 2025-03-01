@@ -14,13 +14,20 @@ from celcat_scraper import (
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult, OptionsFlowWithConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlowWithConfigEntry
 from homeassistant.const import CONF_NAME, CONF_URL, CONF_USERNAME, CONF_PASSWORD, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.selector import BooleanSelector
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN, DEFAULT_NAME, DEFAULT_SCAN_INTERVAL
+from .const import (
+    DOMAIN,
+    DEFAULT_NAME,
+    DEFAULT_SCAN_INTERVAL,
+    CONF_SHOW_HOLIDAYS,
+    DEFAULT_SHOW_HOLIDAYS
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,6 +49,7 @@ STEP_REAUTH_DATA_SCHEMA = vol.Schema(
 OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
+        vol.Optional(CONF_SHOW_HOLIDAYS, default=DEFAULT_SHOW_HOLIDAYS): BooleanSelector(),
     }
 )
 
@@ -169,7 +177,7 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(data=user_input)

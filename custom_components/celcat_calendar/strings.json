@@ -45,7 +45,8 @@
     "step": {
       "init": {
         "data": {
-          "scan_interval": "Scan Interval (hours)"
+          "scan_interval": "Scan Interval (hours)",
+          "show_holidays": "Show holidays"
         }
       }
     }

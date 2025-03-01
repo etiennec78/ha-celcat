@@ -2,6 +2,8 @@
 
 DOMAIN = "celcat_calendar"
 
-DEFAULT_NAME = "Celcat Calendar"
+CONF_SHOW_HOLIDAYS = "show_holidays"
 
+DEFAULT_NAME = "Celcat Calendar"
 DEFAULT_SCAN_INTERVAL = 12
+DEFAULT_SHOW_HOLIDAYS = False
