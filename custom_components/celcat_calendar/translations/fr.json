@@ -41,6 +41,20 @@
       }
     }
   },
+  "entity": {
+    "calendar": {
+      "description": {
+        "faculty": "Faculté",
+        "notes": "Notes",
+        "professor": "Professeur",
+        "professors": "Professeurs",
+        "room": "Salle",
+        "rooms": "Salles",
+        "site": "Site",
+        "sites": "Sites"
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {

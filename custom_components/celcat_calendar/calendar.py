@@ -12,6 +12,7 @@ from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import dt as dt_util
 
 from . import CelcatConfigEntry
@@ -38,6 +39,9 @@ async def async_setup_entry(
 
     async_add_entities(entities, True)
 
+    for entity in entities:
+        await entity.async_init_translations()
+
 
 class CelcatCalendarEntity(CalendarEntity):
     """A calendar entity by Celcat."""
@@ -63,6 +67,24 @@ class CelcatCalendarEntity(CalendarEntity):
             manufacturer="Celcat",
         )
         self.category = category
+        self.translations = {}
+
+    async def async_init_translations(self) -> None:
+        """Initialize translations."""
+        self.translations = await async_get_translations(
+            self.hass,
+            self.hass.config.language,
+            category="entity",
+            integrations=[DOMAIN]
+        )
+        print(self.translations)
+
+    def _get_translation(self, key: str) -> str:
+        """Get translation with fallback to English."""
+        return self.translations.get(
+            f"component.{DOMAIN}.entity.calendar.description.{key}",
+            key.capitalize()
+        )
 
     @property
     def event(self) -> CalendarEvent | None:
@@ -118,17 +140,20 @@ class CelcatCalendarEntity(CalendarEntity):
         """Return a CalendarEvent from an API event."""
         description_parts = []
         if event.get("rooms"):
-            description_parts.append(f"Rooms: {', '.join(event['rooms'])}")
+            key = "rooms" if len(event["rooms"]) > 1 else "room"
+            description_parts.append(f"{self._get_translation(key)}: {', '.join(event['rooms'])}")
         if event.get("professors"):
+            key = "professors" if len(event["professors"]) > 1 else "professor"
             description_parts.append(
-                f"Professors: {', '.join(professor.split()[0] for professor in event['professors'])}"
+                f"{self._get_translation(key)}: {', '.join(professor.split()[0] for professor in event['professors'])}"
             )
         if event.get("sites"):
-            description_parts.append(f"Sites: {', '.join(event['sites'])}")
+            key = "sites" if len(event["sites"]) > 1 else "site"
+            description_parts.append(f"{self._get_translation(key)}: {', '.join(event['sites'])}")
         if event.get("faculty"):
-            description_parts.append(f"Faculty: {event['faculty']}")
+            description_parts.append(f"{self._get_translation('faculty')}: {event['faculty']}")
         if event.get("notes"):
-            description_parts.append(f"Notes: {event['notes']}")
+            description_parts.append(f"{self._get_translation('notes')}: {event['notes']}")
 
         if event.get("course") and event.get("category"):
             summary = f"{event['category']} {event['course']}"
