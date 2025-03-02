@@ -43,15 +43,21 @@
   },
   "entity": {
     "calendar": {
-      "description": {
-        "faculty": "Faculté",
-        "notes": "Notes",
-        "professor": "Professeur",
-        "professors": "Professeurs",
-        "room": "Salle",
-        "rooms": "Salles",
-        "site": "Site",
-        "sites": "Sites"
+      "celcat_calendar": {
+        "state_attributes": {
+          "events": {
+            "state": {
+              "faculty": "Faculté",
+              "notes": "Notes",
+              "professor": "Professeur",
+              "professors": "Professeurs",
+              "room": "Salle",
+              "rooms": "Salles",
+              "site": "Site",
+              "sites": "Sites"
+            }
+          }
+        }
       }
     }
   },

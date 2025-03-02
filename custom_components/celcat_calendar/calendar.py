@@ -82,7 +82,7 @@ class CelcatCalendarEntity(CalendarEntity):
     def _get_translation(self, key: str) -> str:
         """Get translation with fallback to English."""
         return self.translations.get(
-            f"component.{DOMAIN}.entity.calendar.description.{key}",
+            f"component.{DOMAIN}.entity.calendar.{DOMAIN}.state_attributes.events.state.{key}",
             key.capitalize(),
         )
 
