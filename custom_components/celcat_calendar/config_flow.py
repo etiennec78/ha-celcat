@@ -159,6 +159,8 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
         """Validate the user input allows us to connect."""
         errors: dict[str, str] = {}
 
+        await self._strip_url(data)
+
         try:
             celcat = CelcatScraperAsync(
                 CelcatConfig(
@@ -184,6 +186,14 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
             await celcat.close()
 
         return errors
+
+    async def _strip_url(self, data) -> None:
+        """Strip the URL to get the base URL."""
+        data[CONF_URL] = data[CONF_URL].split("?")[0].rstrip("/")
+        for suffix in ["/cal", "/LdapLogin"]:
+            if data[CONF_URL].endswith(suffix):
+                data[CONF_URL] = data[CONF_URL][:-len(suffix)]
+                break
 
     @staticmethod
     @callback
