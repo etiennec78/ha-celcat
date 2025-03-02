@@ -75,7 +75,7 @@ class CelcatCalendarEntity(CalendarEntity):
             self.hass,
             self.hass.config.language,
             category="entity",
-            integrations=[DOMAIN]
+            integrations=[DOMAIN],
         )
         print(self.translations)
 
@@ -83,7 +83,7 @@ class CelcatCalendarEntity(CalendarEntity):
         """Get translation with fallback to English."""
         return self.translations.get(
             f"component.{DOMAIN}.entity.calendar.description.{key}",
-            key.capitalize()
+            key.capitalize(),
         )
 
     @property
@@ -141,7 +141,9 @@ class CelcatCalendarEntity(CalendarEntity):
         description_parts = []
         if event.get("rooms"):
             key = "rooms" if len(event["rooms"]) > 1 else "room"
-            description_parts.append(f"{self._get_translation(key)}: {', '.join(event['rooms'])}")
+            description_parts.append(
+                f"{self._get_translation(key)}: {', '.join(event['rooms'])}"
+            )
         if event.get("professors"):
             key = "professors" if len(event["professors"]) > 1 else "professor"
             description_parts.append(
@@ -149,11 +151,17 @@ class CelcatCalendarEntity(CalendarEntity):
             )
         if event.get("sites"):
             key = "sites" if len(event["sites"]) > 1 else "site"
-            description_parts.append(f"{self._get_translation(key)}: {', '.join(event['sites'])}")
+            description_parts.append(
+                f"{self._get_translation(key)}: {', '.join(event['sites'])}"
+            )
         if event.get("faculty"):
-            description_parts.append(f"{self._get_translation('faculty')}: {event['faculty']}")
+            description_parts.append(
+                f"{self._get_translation('faculty')}: {event['faculty']}"
+            )
         if event.get("notes"):
-            description_parts.append(f"{self._get_translation('notes')}: {event['notes']}")
+            description_parts.append(
+                f"{self._get_translation('notes')}: {event['notes']}"
+            )
 
         if event.get("course") and event.get("category"):
             summary = f"{event['category']} {event['course']}"
