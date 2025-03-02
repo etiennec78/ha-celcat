@@ -1,5 +1,6 @@
 {
   "name": "Celcat Calendar",
-  "zip_release": true,
-  "filename": "celcat_calendar.zip"
+  "filename": "celcat_calendar.zip",
+  "homeassistant": "2025.3.0b0",
+  "zip_release": true
 }
