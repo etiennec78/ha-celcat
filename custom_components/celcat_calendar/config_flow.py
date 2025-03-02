@@ -192,7 +192,7 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
         data[CONF_URL] = data[CONF_URL].split("?")[0].rstrip("/")
         for suffix in ["/cal", "/LdapLogin"]:
             if data[CONF_URL].endswith(suffix):
-                data[CONF_URL] = data[CONF_URL][:-len(suffix)]
+                data[CONF_URL] = data[CONF_URL][: -len(suffix)]
                 break
 
     @staticmethod
