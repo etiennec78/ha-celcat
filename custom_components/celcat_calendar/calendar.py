@@ -77,7 +77,6 @@ class CelcatCalendarEntity(CalendarEntity):
             category="entity",
             integrations=[DOMAIN],
         )
-        print(self.translations)
 
     def _get_translation(self, key: str) -> str:
         """Get translation with fallback to English."""
