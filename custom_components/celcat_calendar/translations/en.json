@@ -30,7 +30,7 @@
         }
       },
       "reconfigure": {
-        "title": "[%key:config::step::user::title%]",
+        "title": "Celcat Calendar",
         "description": "Reconfigure your Celcat Calendar",
         "data": {
           "name": "Calendar name",
