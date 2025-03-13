@@ -118,10 +118,12 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
 
             return await self._group_events(tz_events)
 
-    async def _group_events(self, events: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    async def _group_events(
+        self, events: list[dict[str, Any]]
+    ) -> dict[str, list[dict[str, Any]]]:
         """Group events by course or category based on configuration."""
         grouped_events: dict[str, list[dict[str, Any]]] = {"all": events}
-        
+
         group_by = self.options.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
         if group_by == GROUP_BY_OFF:
             return grouped_events
@@ -147,17 +149,17 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
         grouping_strategies = {
             GROUP_BY_CATEGORY: get_group_by_category,
             GROUP_BY_COURSE: get_group_by_course,
-            GROUP_BY_CATEGORY_COURSE: get_group_by_category_course
+            GROUP_BY_CATEGORY_COURSE: get_group_by_category_course,
         }
-        
+
         get_group = grouping_strategies.get(group_by, lambda e: "unknown")
-        
+
         for event in events:
             group = get_group(event)
             if group not in grouped_events:
                 grouped_events[group] = []
             grouped_events[group].append(event)
-            
+
         return grouped_events
 
 
