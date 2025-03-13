@@ -67,8 +67,18 @@
         "data": {
           "scan_interval": "Intervalle de rafraîchissement (heures)",
           "show_holidays": "Afficher les vacances",
-          "group_events": "Grouper les évènements"
+          "group_by": "Grouper les évènements"
         }
+      }
+    }
+  },
+  "selector": {
+    "group_by": {
+      "options": {
+        "off": "Un calendrier les contenant tous",
+        "category": "Grouper par catégorie",
+        "category_course": "Grouper par catégorie et cours",
+        "course": "Grouper par cours"
       }
     }
   },
