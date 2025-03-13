@@ -79,7 +79,6 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
         today = dt_util.now().date()
         end_year = today.year + (1 if today.month >= 9 else 0)
         end = date(year=end_year, month=8, day=31)
-        # end = today + timedelta(days=4)  # TODO
 
         async with async_timeout.timeout(180):
             # Load existing data from the local store
@@ -96,7 +95,6 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             else:
                 # Fetch past and future events
                 start = date(end_year - 1, 9, 1)
-                # start = today  # TODO
 
             events = await self.celcat.get_calendar_events(
                 start=start,
