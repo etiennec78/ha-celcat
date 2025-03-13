@@ -26,8 +26,12 @@ from homeassistant.util import dt as dt_util
 from .const import (
     DOMAIN,
     DEFAULT_SCAN_INTERVAL,
-    CONF_GROUP_EVENTS,
-    DEFAULT_GROUP_EVENTS,
+    CONF_GROUP_BY,
+    DEFAULT_GROUP_BY,
+    GROUP_BY_OFF,
+    GROUP_BY_CATEGORY,
+    GROUP_BY_CATEGORY_COURSE,
+    GROUP_BY_COURSE,
 )
 from .store import CelcatStore
 
@@ -75,6 +79,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
         today = dt_util.now().date()
         end_year = today.year + (1 if today.month >= 9 else 0)
         end = date(year=end_year, month=8, day=31)
+        # end = today + timedelta(days=4)  # TODO
 
         async with async_timeout.timeout(180):
             # Load existing data from the local store
@@ -91,6 +96,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             else:
                 # Fetch past and future events
                 start = date(end_year - 1, 9, 1)
+                # start = today  # TODO
 
             events = await self.celcat.get_calendar_events(
                 start=start,
@@ -112,17 +118,46 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
 
             return await self._group_events(tz_events)
 
-    async def _group_events(self, events) -> dict[str, list[dict[str, Any]]]:
-        """Group events by courses."""
-        grouped_events = {"all": events}
+    async def _group_events(self, events: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+        """Group events by course or category based on configuration."""
+        grouped_events: dict[str, list[dict[str, Any]]] = {"all": events}
+        
+        group_by = self.options.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
+        if group_by == GROUP_BY_OFF:
+            return grouped_events
 
-        if self.options.get(CONF_GROUP_EVENTS, DEFAULT_GROUP_EVENTS):
-            for event in events:
-                group = event.get("category", "") + (
-                    f" {event['course']}" if event.get("course") else ""
-                )
-                grouped_events[group] = grouped_events.get(group, []) + [event]
+        def get_group_by_category(event: dict[str, Any]) -> str:
+            return event.get("category") or "unknown"
 
+        def get_group_by_course(event: dict[str, Any]) -> str:
+            return event.get("course") or "unknown"
+
+        def get_group_by_category_course(event: dict[str, Any]) -> str:
+            category = event.get("category", "")
+            course = event.get("course", "")
+
+            if category and course:
+                return f"{category} {course}"
+            elif category:
+                return category
+            elif course:
+                return course
+            return "unknown"
+
+        grouping_strategies = {
+            GROUP_BY_CATEGORY: get_group_by_category,
+            GROUP_BY_COURSE: get_group_by_course,
+            GROUP_BY_CATEGORY_COURSE: get_group_by_category_course
+        }
+        
+        get_group = grouping_strategies.get(group_by, lambda e: "unknown")
+        
+        for event in events:
+            group = get_group(event)
+            if group not in grouped_events:
+                grouped_events[group] = []
+            grouped_events[group].append(event)
+            
         return grouped_events
 
 
