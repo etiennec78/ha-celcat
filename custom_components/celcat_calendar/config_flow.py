@@ -29,17 +29,26 @@ from homeassistant.const import (
 )
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.selector import BooleanSelector
+from homeassistant.helpers.selector import (
+    BooleanSelector,
+    SelectSelector,
+    SelectSelectorConfig,
+)
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_registry as er
 
 from .const import (
     DOMAIN,
+    CONF_SHOW_HOLIDAYS,
+    CONF_GROUP_BY,
+    GROUP_BY_OFF,
+    GROUP_BY_CATEGORY,
+    GROUP_BY_CATEGORY_COURSE,
+    GROUP_BY_COURSE,
     DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
-    CONF_SHOW_HOLIDAYS,
-    CONF_GROUP_EVENTS,
     DEFAULT_SHOW_HOLIDAYS,
-    DEFAULT_GROUP_EVENTS,
+    DEFAULT_GROUP_BY,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -65,9 +74,17 @@ OPTIONS_SCHEMA = vol.Schema(
         vol.Optional(
             CONF_SHOW_HOLIDAYS, default=DEFAULT_SHOW_HOLIDAYS
         ): BooleanSelector(),
-        vol.Optional(
-            CONF_GROUP_EVENTS, default=DEFAULT_GROUP_EVENTS
-        ): BooleanSelector(),
+        vol.Optional(CONF_GROUP_BY, default=DEFAULT_GROUP_BY): SelectSelector(
+            SelectSelectorConfig(
+                options=[
+                    GROUP_BY_OFF,
+                    GROUP_BY_CATEGORY,
+                    GROUP_BY_CATEGORY_COURSE,
+                    GROUP_BY_COURSE,
+                ],
+                translation_key=CONF_GROUP_BY,
+            )
+        ),
     }
 )
 
@@ -212,9 +229,26 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
     ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
+            old_group_by = self.config_entry.options.get(
+                CONF_GROUP_BY, DEFAULT_GROUP_BY
+            )
+            new_group_by = user_input.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
+
+            if old_group_by != new_group_by:
+                entity_registry = er.async_get(self.hass)
+
+                entities = er.async_entries_for_config_entry(
+                    entity_registry, self.config_entry.entry_id
+                )
+
+                for entity in entities:
+                    if entity.domain == "calendar":
+                        entity_registry.async_remove(entity.entity_id)
+
             self.hass.config_entries.async_update_entry(
                 self.config_entry, options=user_input
             )
+
             self.hass.async_create_task(
                 self.hass.config_entries.async_reload(self.config_entry.entry_id)
             )

@@ -67,8 +67,18 @@
         "data": {
           "scan_interval": "Scan Interval (hours)",
           "show_holidays": "Show holidays",
-          "group_events": "Group events"
+          "group_by": "Event grouping"
         }
+      }
+    }
+  },
+  "selector": {
+    "group_by": {
+      "options": {
+        "off": "One calendar for all",
+        "category": "Group by category",
+        "category_course": "Group by category and course",
+        "course": "Group by course"
       }
     }
   },
