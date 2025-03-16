@@ -7,6 +7,7 @@ from typing import Any
 
 from celcat_scraper import (
     CelcatConfig,
+    FilterType,
     CelcatScraperAsync,
     CelcatCannotConnectError,
     CelcatInvalidAuthError,
@@ -41,6 +42,7 @@ from .const import (
     DOMAIN,
     CONF_SHOW_HOLIDAYS,
     CONF_GROUP_BY,
+    CONF_FILTERS,
     GROUP_BY_OFF,
     GROUP_BY_CATEGORY,
     GROUP_BY_CATEGORY_COURSE,
@@ -49,6 +51,7 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SHOW_HOLIDAYS,
     DEFAULT_GROUP_BY,
+    DEFAULT_FILTERS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -83,6 +86,13 @@ OPTIONS_SCHEMA = vol.Schema(
                     GROUP_BY_COURSE,
                 ],
                 translation_key=CONF_GROUP_BY,
+            )
+        ),
+        vol.Optional(CONF_FILTERS, default=DEFAULT_FILTERS): SelectSelector(
+            SelectSelectorConfig(
+                options=[filter_type.value for filter_type in FilterType],
+                translation_key=CONF_FILTERS,
+                multiple=True,
             )
         ),
     }
@@ -234,7 +244,12 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
             )
             new_group_by = user_input.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
 
-            if old_group_by != new_group_by:
+            old_filters = self.config_entry.options.get(CONF_FILTERS, DEFAULT_FILTERS)
+            new_filters = user_input.get(CONF_FILTERS, DEFAULT_FILTERS)
+
+            if old_group_by != new_group_by or old_filters != new_filters:
+                _LOGGER.info("Reorganizing calendar entities")
+
                 entity_registry = er.async_get(self.hass)
 
                 entities = er.async_entries_for_config_entry(
