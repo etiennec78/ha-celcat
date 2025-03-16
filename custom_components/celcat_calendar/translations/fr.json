@@ -73,6 +73,10 @@
           "group_by": "Grouper les évènements",
           "filters": "Filtres de données",
           "replacements": "Remplacements de noms de cours"
+        },
+        "data_description": {
+          "filters": "Les filtres de données peuvent être utiles si Celcat contient des données non standardisées.\nPar exemple, les données brutes peuvent contenir différents noms pour le même cours, empêchant leur regroupement.",
+          "replacements": "Si les filtres n'ont pas pu normaliser tous les noms de cours, vous pouvez définir des remplacements manuels.\nExemple : `CM Maths:Maths` remplacera tous les 'CM Maths' par 'Maths'."
         }
       }
     }
