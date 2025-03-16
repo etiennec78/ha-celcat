@@ -26,6 +26,7 @@ from homeassistant.util import dt as dt_util
 from .const import (
     DOMAIN,
     DEFAULT_SCAN_INTERVAL,
+    REMEMBERED_STRIPS,
     CONF_GROUP_BY,
     DEFAULT_GROUP_BY,
     GROUP_BY_OFF,
@@ -57,9 +58,11 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             always_update=False,
         )
         data = entry.runtime_data
+        self.hass = hass
         self.celcat: CelcatScraperAsync = data.client
         self._store: CelcatStore = data.store
         self.options = entry.options
+        self._entry = entry
 
     async def _async_update_data(self) -> list[dict]:
         """Update data via library."""
@@ -103,6 +106,9 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             )
 
             await self.celcat.close()
+            await self._save_remembered_strips(
+                self.celcat.config.filter_config.course_remembered_strips
+            )
             await self._store.async_save(events)
 
             tz_events = [
@@ -127,10 +133,10 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             return grouped_events
 
         def get_group_by_category(event: dict[str, Any]) -> str:
-            return event.get("category") or "unknown"
+            return event.get("category") or "Unknown"
 
         def get_group_by_course(event: dict[str, Any]) -> str:
-            return event.get("course") or "unknown"
+            return event.get("course") or "Unknown"
 
         def get_group_by_category_course(event: dict[str, Any]) -> str:
             category = event.get("category", "")
@@ -142,7 +148,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
                 return category
             elif course:
                 return course
-            return "unknown"
+            return "Unknown"
 
         grouping_strategies = {
             GROUP_BY_CATEGORY: get_group_by_category,
@@ -150,7 +156,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             GROUP_BY_CATEGORY_COURSE: get_group_by_category_course,
         }
 
-        get_group = grouping_strategies.get(group_by, lambda e: "unknown")
+        get_group = grouping_strategies.get(group_by, lambda e: "Unknown")
 
         for event in events:
             group = get_group(event)
@@ -159,6 +165,12 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             grouped_events[group].append(event)
 
         return grouped_events
+
+    async def _save_remembered_strips(self, remembered_strips: list[str]) -> None:
+        """Save remembered strips to the config entry."""
+        data = self._entry.data.copy()
+        data[REMEMBERED_STRIPS] = remembered_strips
+        self.hass.config_entries.async_update_entry(self._entry, data=data)
 
 
 @dataclass

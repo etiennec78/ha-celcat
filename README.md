@@ -43,6 +43,8 @@ You may edit options like:
 - **Scan Interval**: Adjust how frequently events are updated.
 - **Holidays Inclusion**: Decide whether to include holidays in the calendar.
 - **Event Grouping**: Group events for better organization and colors.
+- **Data Filters**: Standardize data fetched from Celcat.
+- **Course Name Replacements**: Manually override course names.
 
 ### How to Edit Options:
 
@@ -63,6 +65,32 @@ To avoid seeing duplicate events in the UI, it is recommend to hide the main cal
 4. Click on the main calendar (it should be at the top).
 5. Select the settings cog in the upper-right corner.
 6. Toggle off the `Visible` option.
+
+### Available Filters 🧹
+
+Data filters can be useful if Celcat contains non-standardized data.
+
+For example, raw data may contain different names for the same course which makes grouping ineffective.
+
+| Filter | Description | Example |
+| :---: | :--- | :--- |
+| Title case | Capitalize only the first letter of each word | MATHS CLASS -> Maths Class |
+| Remove modules | Remove modules from courses names | Maths [DPAMAT2D] -> Maths |
+| Remove category | Remove category from course names | Maths CM -> Maths |
+| Remove punctuation | Remove ".,:;!?" from text | Math. -> Math |
+| Group similar courses | Search for all event names and group ones containing another | Maths, Maths S1 -> Maths |
+| Remove redundant parts | Extract parts removed by the previous filter and remove them from all other courses | Physics S1 -> Physics |
+| Remove text after number | Remove all text after the first number found | Room 403 32 seats -> Room 403 |
+| Remove duplicates | Remove duplicates from the list | Building A, Building A -> Building A |
+
+### Course name replacements 🔄
+
+In case filters couldn't standardize all course names, you can set manual replacements.
+
+To do so, enter source:output combinations to manually replace course names.
+
+Example: `Math Class:Maths` will replace all "Math Class" courses by "Maths".
+
 
 ## Consider supporting ? 🩷
 
