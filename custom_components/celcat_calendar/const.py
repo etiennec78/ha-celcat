@@ -5,6 +5,7 @@ DOMAIN = "celcat_calendar"
 CONF_SHOW_HOLIDAYS = "show_holidays"
 CONF_GROUP_BY = "group_by"
 CONF_FILTERS = "filters"
+CONF_REPLACEMENTS = "replacements"
 
 GROUP_BY_OFF = "off"
 GROUP_BY_CATEGORY = "category"
@@ -26,3 +27,4 @@ DEFAULT_FILTERS = {
     "sites_title",
     "sites_remove_duplicates",
 }
+DEFAULT_REPLACEMENTS = []

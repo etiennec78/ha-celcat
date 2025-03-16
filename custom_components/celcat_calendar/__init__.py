@@ -18,12 +18,15 @@ from .const import (
     DOMAIN,
     CONF_SHOW_HOLIDAYS,
     CONF_FILTERS,
+    CONF_REPLACEMENTS,
     REMEMBERED_STRIPS,
     DEFAULT_SHOW_HOLIDAYS,
     DEFAULT_FILTERS,
+    DEFAULT_REPLACEMENTS,
 )
 from .coordinator import CelcatDataUpdateCoordinator, CelcatData, CelcatConfigEntry
 from .store import CelcatStore
+from .util import list_to_dict
 
 PLATFORMS: list[Platform] = [Platform.CALENDAR]
 
@@ -41,9 +44,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: CelcatConfigEntry) -> bo
         except ValueError:
             _LOGGER.warning("Ignoring invalid filter: %s", filter_string)
 
+    replacements = await list_to_dict(
+        entry.options.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
+    )
     filter_config = CelcatFilterConfig(
         filters=filter_types,
         course_remembered_strips=entry.data.get(REMEMBERED_STRIPS, []),
+        course_replacements=replacements,
     )
 
     celcat = CelcatScraperAsync(

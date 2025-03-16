@@ -43,6 +43,7 @@ from .const import (
     CONF_SHOW_HOLIDAYS,
     CONF_GROUP_BY,
     CONF_FILTERS,
+    CONF_REPLACEMENTS,
     GROUP_BY_OFF,
     GROUP_BY_CATEGORY,
     GROUP_BY_CATEGORY_COURSE,
@@ -52,7 +53,9 @@ from .const import (
     DEFAULT_SHOW_HOLIDAYS,
     DEFAULT_GROUP_BY,
     DEFAULT_FILTERS,
+    DEFAULT_REPLACEMENTS,
 )
+from .util import list_to_dict
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -93,6 +96,13 @@ OPTIONS_SCHEMA = vol.Schema(
                 options=[filter_type.value for filter_type in FilterType],
                 translation_key=CONF_FILTERS,
                 multiple=True,
+            )
+        ),
+        vol.Optional(CONF_REPLACEMENTS, default=DEFAULT_REPLACEMENTS): SelectSelector(
+            SelectSelectorConfig(
+                options=[],
+                multiple=True,
+                custom_value=True,
             )
         ),
     }
@@ -238,53 +248,79 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Manage the options."""
+        errors: dict[str, str] = {}
+
         if user_input is not None:
-            old_group_by = self.config_entry.options.get(
-                CONF_GROUP_BY, DEFAULT_GROUP_BY
-            )
-            new_group_by = user_input.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
+            try:
+                replacements = await list_to_dict(
+                    user_input.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
+                )
+            except ValueError:
+                errors[CONF_REPLACEMENTS] = "invalid_replacements_value"
 
-            old_filters = self.config_entry.options.get(CONF_FILTERS, DEFAULT_FILTERS)
-            new_filters = user_input.get(CONF_FILTERS, DEFAULT_FILTERS)
+            if not errors:
+                old_group_by = self.config_entry.options.get(
+                    CONF_GROUP_BY, DEFAULT_GROUP_BY
+                )
+                new_group_by = user_input.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
 
-            filters_removed = False
-            for old_filter in old_filters:
-                if old_filter not in new_filters:
-                    filters_removed = True
-                    break
+                old_filters = self.config_entry.options.get(
+                    CONF_FILTERS, DEFAULT_FILTERS
+                )
+                new_filters = user_input.get(CONF_FILTERS, DEFAULT_FILTERS)
 
-            if filters_removed:
-                _LOGGER.info("A data filter has been removed, resetting stored data")
-                store = self.config_entry.runtime_data.store
-
-                await store.async_save([])
-
-            if old_group_by != new_group_by or old_filters != new_filters:
-                _LOGGER.info("Reorganizing calendar entities")
-
-                entity_registry = er.async_get(self.hass)
-
-                entities = er.async_entries_for_config_entry(
-                    entity_registry, self.config_entry.entry_id
+                old_replacements = self.config_entry.options.get(
+                    CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS
+                )
+                new_replacements = user_input.get(
+                    CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS
                 )
 
-                for entity in entities:
-                    if entity.domain == "calendar":
-                        entity_registry.async_remove(entity.entity_id)
+                filters_removed = False
+                for old_filter in old_filters:
+                    if old_filter not in new_filters:
+                        filters_removed = True
+                        break
 
-            self.hass.config_entries.async_update_entry(
-                self.config_entry, options=user_input
-            )
+                if filters_removed:
+                    _LOGGER.info(
+                        "A data filter has been removed, resetting stored data"
+                    )
+                    store = self.config_entry.runtime_data.store
 
-            self.hass.async_create_task(
-                self.hass.config_entries.async_reload(self.config_entry.entry_id)
-            )
+                    await store.async_save([])
 
-            return self.async_create_entry(data=user_input)
+                if (
+                    old_group_by != new_group_by
+                    or old_filters != new_filters
+                    or old_replacements != new_replacements
+                ):
+                    _LOGGER.info("Reorganizing calendar entities")
+
+                    entity_registry = er.async_get(self.hass)
+
+                    entities = er.async_entries_for_config_entry(
+                        entity_registry, self.config_entry.entry_id
+                    )
+
+                    for entity in entities:
+                        if entity.domain == "calendar":
+                            entity_registry.async_remove(entity.entity_id)
+
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry, options=user_input
+                )
+
+                self.hass.async_create_task(
+                    self.hass.config_entries.async_reload(self.config_entry.entry_id)
+                )
+
+                return self.async_create_entry(data=user_input)
 
         return self.async_show_form(
             step_id="init",
             data_schema=self.add_suggested_values_to_schema(
                 OPTIONS_SCHEMA, self.config_entry.options
             ),
+            errors=errors,
         )
