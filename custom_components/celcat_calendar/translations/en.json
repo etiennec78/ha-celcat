@@ -68,7 +68,7 @@
     "step": {
       "init": {
         "data": {
-          "scan_interval": "Scan Interval (hours)",
+          "scan_interval": "Scan interval (hours)",
           "show_holidays": "Show holidays",
           "group_by": "Event grouping",
           "filters": "Data filters",
