@@ -81,9 +81,9 @@
     "group_by": {
       "options": {
         "off": "One calendar for all",
+        "course": "Group by course",
         "category": "Group by category",
-        "category_course": "Group by category and course",
-        "course": "Group by course"
+        "category_course": "Group by category and course"
       }
     },
     "filters": {

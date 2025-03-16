@@ -45,9 +45,9 @@ from .const import (
     CONF_FILTERS,
     CONF_REPLACEMENTS,
     GROUP_BY_OFF,
+    GROUP_BY_COURSE,
     GROUP_BY_CATEGORY,
     GROUP_BY_CATEGORY_COURSE,
-    GROUP_BY_COURSE,
     DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SHOW_HOLIDAYS,
@@ -84,9 +84,9 @@ OPTIONS_SCHEMA = vol.Schema(
             SelectSelectorConfig(
                 options=[
                     GROUP_BY_OFF,
+                    GROUP_BY_COURSE,
                     GROUP_BY_CATEGORY,
                     GROUP_BY_CATEGORY_COURSE,
-                    GROUP_BY_COURSE,
                 ],
                 translation_key=CONF_GROUP_BY,
             )

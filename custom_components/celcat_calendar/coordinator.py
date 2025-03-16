@@ -30,9 +30,9 @@ from .const import (
     CONF_GROUP_BY,
     DEFAULT_GROUP_BY,
     GROUP_BY_OFF,
+    GROUP_BY_COURSE,
     GROUP_BY_CATEGORY,
     GROUP_BY_CATEGORY_COURSE,
-    GROUP_BY_COURSE,
 )
 from .store import CelcatStore
 
@@ -132,11 +132,11 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
         if group_by == GROUP_BY_OFF:
             return grouped_events
 
-        def get_group_by_category(event: dict[str, Any]) -> str:
-            return event.get("category") or "Unknown"
-
         def get_group_by_course(event: dict[str, Any]) -> str:
             return event.get("course") or "Unknown"
+
+        def get_group_by_category(event: dict[str, Any]) -> str:
+            return event.get("category") or "Unknown"
 
         def get_group_by_category_course(event: dict[str, Any]) -> str:
             category = event.get("category", "")
@@ -151,8 +151,8 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             return "Unknown"
 
         grouping_strategies = {
-            GROUP_BY_CATEGORY: get_group_by_category,
             GROUP_BY_COURSE: get_group_by_course,
+            GROUP_BY_CATEGORY: get_group_by_category,
             GROUP_BY_CATEGORY_COURSE: get_group_by_category_course,
         }
 

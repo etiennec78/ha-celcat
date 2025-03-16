@@ -81,9 +81,9 @@
     "group_by": {
       "options": {
         "off": "Un calendrier les contenant tous",
+        "course": "Grouper par cours",
         "category": "Grouper par catégorie",
-        "category_course": "Grouper par catégorie et cours",
-        "course": "Grouper par cours"
+        "category_course": "Grouper par catégorie et cours"
       }
     },
     "filters": {
