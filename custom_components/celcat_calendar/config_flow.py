@@ -204,7 +204,6 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
                     url=data[CONF_URL],
                     username=data[CONF_USERNAME],
                     password=data[CONF_PASSWORD],
-                    rate_limit=0.1,
                     session=async_get_clientsession(self.hass),
                 )
             )
