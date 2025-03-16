@@ -127,10 +127,10 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             return grouped_events
 
         def get_group_by_category(event: dict[str, Any]) -> str:
-            return event.get("category") or "unknown"
+            return event.get("category") or "Unknown"
 
         def get_group_by_course(event: dict[str, Any]) -> str:
-            return event.get("course") or "unknown"
+            return event.get("course") or "Unknown"
 
         def get_group_by_category_course(event: dict[str, Any]) -> str:
             category = event.get("category", "")
@@ -142,7 +142,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
                 return category
             elif course:
                 return course
-            return "unknown"
+            return "Unknown"
 
         grouping_strategies = {
             GROUP_BY_CATEGORY: get_group_by_category,
@@ -150,7 +150,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             GROUP_BY_CATEGORY_COURSE: get_group_by_category_course,
         }
 
-        get_group = grouping_strategies.get(group_by, lambda e: "unknown")
+        get_group = grouping_strategies.get(group_by, lambda e: "Unknown")
 
         for event in events:
             group = get_group(event)
