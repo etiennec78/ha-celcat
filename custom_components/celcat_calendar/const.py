@@ -11,6 +11,8 @@ GROUP_BY_CATEGORY = "category"
 GROUP_BY_CATEGORY_COURSE = "category_course"
 GROUP_BY_COURSE = "course"
 
+REMEMBERED_STRIPS = "remembered_strips"
+
 DEFAULT_NAME = "Celcat Calendar"
 DEFAULT_SCAN_INTERVAL = 12
 DEFAULT_SHOW_HOLIDAYS = False

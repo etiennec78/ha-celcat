@@ -18,6 +18,7 @@ from .const import (
     DOMAIN,
     CONF_SHOW_HOLIDAYS,
     CONF_FILTERS,
+    REMEMBERED_STRIPS,
     DEFAULT_SHOW_HOLIDAYS,
     DEFAULT_FILTERS,
 )
@@ -42,6 +43,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: CelcatConfigEntry) -> bo
 
     filter_config = CelcatFilterConfig(
         filters=filter_types,
+        course_remembered_strips=entry.data.get(REMEMBERED_STRIPS, []),
     )
 
     celcat = CelcatScraperAsync(
