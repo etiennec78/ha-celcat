@@ -67,7 +67,8 @@
         "data": {
           "scan_interval": "Scan Interval (hours)",
           "show_holidays": "Show holidays",
-          "group_by": "Event grouping"
+          "group_by": "Event grouping",
+          "filters": "Data filters"
         }
       }
     }
@@ -79,6 +80,21 @@
         "category": "Group by category",
         "category_course": "Group by category and course",
         "course": "Group by course"
+      }
+    },
+    "filters": {
+      "options": {
+        "course_title": "Courses: Title case",
+        "course_strip_modules": "Courses: Remove modules",
+        "course_strip_category": "Courses: Remove category",
+        "course_strip_punctuation": "Courses: Remove punctuation",
+        "course_group_similar": "Courses: Group similar courses",
+        "course_strip_redundant": "Courses: Remove redundant parts",
+        "professors_title": "Professors: Title case",
+        "rooms_title": "Rooms: Title case",
+        "rooms_strip_after_number": "Rooms: Remove text after number",
+        "sites_title": "Sites: Title case",
+        "sites_remove_duplicates": "Sites: Remove duplicates"
       }
     }
   },

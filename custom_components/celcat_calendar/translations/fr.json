@@ -67,7 +67,8 @@
         "data": {
           "scan_interval": "Intervalle de rafraîchissement (heures)",
           "show_holidays": "Afficher les vacances",
-          "group_by": "Grouper les évènements"
+          "group_by": "Grouper les évènements",
+          "filters": "Filtres de données"
         }
       }
     }
@@ -79,6 +80,21 @@
         "category": "Grouper par catégorie",
         "category_course": "Grouper par catégorie et cours",
         "course": "Grouper par cours"
+      }
+    },
+    "filters": {
+      "options": {
+        "course_title": "Cours: Majuscules uniquement en début de mots",
+        "course_strip_modules": "Cours: Supprimer les modules",
+        "course_strip_category": "Cours: Supprimer la catégorie",
+        "course_strip_punctuation": "Cours: Supprimer la ponctuation",
+        "course_group_similar": "Cours: Grouper les cours similaires",
+        "course_strip_redundant": "Cours: Supprimer les éléments redondants",
+        "professors_title": "Professeurs: Majuscules uniquement en début de noms",
+        "rooms_title": "Salles: Majuscules uniquement en début de mots",
+        "rooms_strip_after_number": "Salles: Supprimer après le numéro",
+        "sites_title": "Sites: Majuscules uniquement en début de mots",
+        "sites_remove_duplicates": "Sites: Supprimer les doublons"
       }
     }
   },
