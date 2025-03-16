@@ -247,6 +247,18 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
             old_filters = self.config_entry.options.get(CONF_FILTERS, DEFAULT_FILTERS)
             new_filters = user_input.get(CONF_FILTERS, DEFAULT_FILTERS)
 
+            filters_removed = False
+            for old_filter in old_filters:
+                if old_filter not in new_filters:
+                    filters_removed = True
+                    break
+
+            if filters_removed:
+                _LOGGER.info("A data filter has been removed, resetting stored data")
+                store = self.config_entry.runtime_data.store
+
+                await store.async_save([])
+
             if old_group_by != new_group_by or old_filters != new_filters:
                 _LOGGER.info("Reorganizing calendar entities")
 
