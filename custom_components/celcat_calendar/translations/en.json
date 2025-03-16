@@ -62,13 +62,17 @@
     }
   },
   "options": {
+    "error": {
+      "invalid_replacements_value": "Invalid replacements value"
+    },
     "step": {
       "init": {
         "data": {
           "scan_interval": "Scan Interval (hours)",
           "show_holidays": "Show holidays",
           "group_by": "Event grouping",
-          "filters": "Data filters"
+          "filters": "Data filters",
+          "replacements": "Course name replacements"
         }
       }
     }

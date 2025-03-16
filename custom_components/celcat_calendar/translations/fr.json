@@ -62,13 +62,17 @@
     }
   },
   "options": {
+    "error": {
+      "invalid_replacements_value": "Invalid replacements value"
+    },
     "step": {
       "init": {
         "data": {
           "scan_interval": "Intervalle de rafraîchissement (heures)",
           "show_holidays": "Afficher les vacances",
           "group_by": "Grouper les évènements",
-          "filters": "Filtres de données"
+          "filters": "Filtres de données",
+          "replacements": "Remplacements de noms de cours"
         }
       }
     }
