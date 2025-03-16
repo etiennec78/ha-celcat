@@ -66,6 +66,9 @@ class CelcatCalendarEntity(CalendarEntity):
             identifiers={(DOMAIN, entry_id)},
             manufacturer="Celcat",
         )
+        self._attr_entity_registry_visible_default = (
+            len(coordinator.data) == 1 or category != "all"
+        )
         self.category = category
         self.translations = {}
 

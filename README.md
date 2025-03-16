@@ -53,19 +53,6 @@ You may edit options like:
 3. Next to your calendar, click on `CONFIGURE`.
 4. Edit the options and click on `SUBMIT`.
 
-
-### Hide Duplicate Events (with Event Grouping) 😶‍🌫️
-
-When event grouping is enabled, the main calendar remains for automation purposes.
-To avoid seeing duplicate events in the UI, it is recommend to hide the main calendar:
-
-1. Go to **Settings > Devices & Services**.
-2. Click on the `[Celcat Calendar](https://my.home-assistant.io/redirect/integration/?domain=celcat_calendar)` integration.
-3. Click on `"X" entities`.
-4. Click on the main calendar (it should be at the top).
-5. Select the settings cog in the upper-right corner.
-6. Toggle off the `Visible` option.
-
 ### Available Filters 🧹
 
 Data filters can be useful if Celcat contains non-standardized data.
