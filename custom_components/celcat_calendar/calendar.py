@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterator
-from collections import defaultdict
 from datetime import datetime, time
 from typing import Any
-import logging
 
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.core import HomeAssistant
@@ -16,8 +15,8 @@ from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import dt as dt_util
 
 from . import CelcatConfigEntry
-from .coordinator import CelcatDataUpdateCoordinator
 from .const import DOMAIN
+from .coordinator import CelcatDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 

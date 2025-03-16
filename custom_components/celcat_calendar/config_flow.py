@@ -5,15 +5,15 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from celcat_scraper import (
-    CelcatConfig,
-    FilterType,
-    CelcatScraperAsync,
-    CelcatCannotConnectError,
-    CelcatInvalidAuthError,
-)
-
 import voluptuous as vol
+
+from celcat_scraper import (
+    CelcatCannotConnectError,
+    CelcatConfig,
+    CelcatInvalidAuthError,
+    CelcatScraperAsync,
+    FilterType,
+)
 
 from homeassistant.config_entries import (
     ConfigEntry,
@@ -23,37 +23,37 @@ from homeassistant.config_entries import (
 )
 from homeassistant.const import (
     CONF_NAME,
-    CONF_URL,
-    CONF_USERNAME,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
+    CONF_URL,
+    CONF_USERNAME,
 )
 from homeassistant.core import callback
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import (
     BooleanSelector,
     SelectSelector,
     SelectSelectorConfig,
 )
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers import entity_registry as er
 
 from .const import (
-    DOMAIN,
-    CONF_SHOW_HOLIDAYS,
-    CONF_GROUP_BY,
     CONF_FILTERS,
+    CONF_GROUP_BY,
     CONF_REPLACEMENTS,
-    GROUP_BY_OFF,
-    GROUP_BY_COURSE,
-    GROUP_BY_CATEGORY,
-    GROUP_BY_CATEGORY_COURSE,
+    CONF_SHOW_HOLIDAYS,
+    DEFAULT_FILTERS,
+    DEFAULT_GROUP_BY,
     DEFAULT_NAME,
+    DEFAULT_REPLACEMENTS,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SHOW_HOLIDAYS,
-    DEFAULT_GROUP_BY,
-    DEFAULT_FILTERS,
-    DEFAULT_REPLACEMENTS,
+    DOMAIN,
+    GROUP_BY_CATEGORY,
+    GROUP_BY_CATEGORY_COURSE,
+    GROUP_BY_COURSE,
+    GROUP_BY_OFF,
 )
 from .util import list_to_dict
 
@@ -204,6 +204,7 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
                     url=data[CONF_URL],
                     username=data[CONF_USERNAME],
                     password=data[CONF_PASSWORD],
+                    rate_limit=0.1,
                     session=async_get_clientsession(self.hass),
                 )
             )
@@ -251,7 +252,7 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
 
         if user_input is not None:
             try:
-                replacements = await list_to_dict(
+                await list_to_dict(
                     user_input.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
                 )
             except ValueError:

@@ -8,7 +8,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
 from .coordinator import CelcatConfigEntry
-from .const import DOMAIN
 
 TO_REDACT = {"id", "rooms", "professors", "modules", "department", "sites"}
 

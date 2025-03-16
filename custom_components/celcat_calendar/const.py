@@ -8,9 +8,9 @@ CONF_FILTERS = "filters"
 CONF_REPLACEMENTS = "replacements"
 
 GROUP_BY_OFF = "off"
+GROUP_BY_COURSE = "course"
 GROUP_BY_CATEGORY = "category"
 GROUP_BY_CATEGORY_COURSE = "category_course"
-GROUP_BY_COURSE = "course"
 
 REMEMBERED_STRIPS = "remembered_strips"
 

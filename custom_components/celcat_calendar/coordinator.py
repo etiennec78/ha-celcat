@@ -1,16 +1,18 @@
 """The Celcat Calendar integration data coordinator."""
 
-from datetime import datetime, timedelta, date
-import logging
+from __future__ import annotations
 
-import async_timeout
+import logging
 from dataclasses import dataclass
+from datetime import date, datetime, timedelta
 from typing import Any
 
+import async_timeout
+
 from celcat_scraper import (
-    CelcatScraperAsync,
     CelcatCannotConnectError,
     CelcatInvalidAuthError,
+    CelcatScraperAsync,
 )
 
 from homeassistant.config_entries import ConfigEntry
@@ -24,15 +26,15 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.util import dt as dt_util
 
 from .const import (
-    DOMAIN,
-    DEFAULT_SCAN_INTERVAL,
-    REMEMBERED_STRIPS,
     CONF_GROUP_BY,
     DEFAULT_GROUP_BY,
-    GROUP_BY_OFF,
-    GROUP_BY_COURSE,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
     GROUP_BY_CATEGORY,
     GROUP_BY_CATEGORY_COURSE,
+    GROUP_BY_COURSE,
+    GROUP_BY_OFF,
+    REMEMBERED_STRIPS,
 )
 from .store import CelcatStore
 
