@@ -39,7 +39,7 @@ async def system_health_info(hass: HomeAssistant) -> dict[str, Any]:
         if checked_urls[url]:
             reachable_entries += 1
 
-        total_events += len(entry.runtime_data.coordinator.data)
+        total_events += len(entry.runtime_data.coordinator.data.get("all", []))
 
     return {
         "reachable_instances": f"{reachable_entries}/{total_entries}",
