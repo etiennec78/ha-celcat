@@ -55,6 +55,7 @@ Celcat Calenddar is configured via the UI. See [the HA docs](https://www.home-as
 You may edit options like:
 - **Scan interval**: Adjust how frequently events are updated.
 - **Holidays inclusion**: Decide whether to include holidays in the calendar.
+- **Titles & descriptions components**: Choose which attributes to include in your event descriptions.
 - **Event grouping**: Group events into multiple calendars for better organization.
 - **Data filters**: Standardize data fetched from Celcat.
 - **Course name replacements**: Manually override course names.
