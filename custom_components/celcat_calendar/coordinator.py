@@ -1,16 +1,18 @@
 """The Celcat Calendar integration data coordinator."""
 
-from datetime import datetime, timedelta, date
-import logging
+from __future__ import annotations
 
-import async_timeout
+import logging
 from dataclasses import dataclass
+from datetime import date, datetime, timedelta
 from typing import Any
 
+import async_timeout
+
 from celcat_scraper import (
-    CelcatScraperAsync,
     CelcatCannotConnectError,
     CelcatInvalidAuthError,
+    CelcatScraperAsync,
 )
 
 from homeassistant.config_entries import ConfigEntry
@@ -24,10 +26,15 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.util import dt as dt_util
 
 from .const import (
-    DOMAIN,
+    CONF_GROUP_BY,
+    DEFAULT_GROUP_BY,
     DEFAULT_SCAN_INTERVAL,
-    CONF_GROUP_EVENTS,
-    DEFAULT_GROUP_EVENTS,
+    DOMAIN,
+    GROUP_BY_CATEGORY,
+    GROUP_BY_CATEGORY_COURSE,
+    GROUP_BY_COURSE,
+    GROUP_BY_OFF,
+    REMEMBERED_STRIPS,
 )
 from .store import CelcatStore
 
@@ -53,9 +60,11 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             always_update=False,
         )
         data = entry.runtime_data
+        self.hass = hass
         self.celcat: CelcatScraperAsync = data.client
         self._store: CelcatStore = data.store
         self.options = entry.options
+        self._entry = entry
 
     async def _async_update_data(self) -> list[dict]:
         """Update data via library."""
@@ -99,6 +108,9 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             )
 
             await self.celcat.close()
+            await self._save_remembered_strips(
+                self.celcat.config.filter_config.course_remembered_strips
+            )
             await self._store.async_save(events)
 
             tz_events = [
@@ -112,18 +124,55 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
 
             return await self._group_events(tz_events)
 
-    async def _group_events(self, events) -> dict[str, list[dict[str, Any]]]:
-        """Group events by courses."""
-        grouped_events = {"all": events}
+    async def _group_events(
+        self, events: list[dict[str, Any]]
+    ) -> dict[str, list[dict[str, Any]]]:
+        """Group events by course or category based on configuration."""
+        grouped_events: dict[str, list[dict[str, Any]]] = {"all": events}
 
-        if self.options.get(CONF_GROUP_EVENTS, DEFAULT_GROUP_EVENTS):
-            for event in events:
-                group = event.get("category", "") + (
-                    f" {event['course']}" if event.get("course") else ""
-                )
-                grouped_events[group] = grouped_events.get(group, []) + [event]
+        group_by = self.options.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
+        if group_by == GROUP_BY_OFF:
+            return grouped_events
+
+        def get_group_by_course(event: dict[str, Any]) -> str:
+            return event.get("course") or "Unknown"
+
+        def get_group_by_category(event: dict[str, Any]) -> str:
+            return event.get("category") or "Unknown"
+
+        def get_group_by_category_course(event: dict[str, Any]) -> str:
+            category = event.get("category", "")
+            course = event.get("course", "")
+
+            if category and course:
+                return f"{category} {course}"
+            elif category:
+                return category
+            elif course:
+                return course
+            return "Unknown"
+
+        grouping_strategies = {
+            GROUP_BY_COURSE: get_group_by_course,
+            GROUP_BY_CATEGORY: get_group_by_category,
+            GROUP_BY_CATEGORY_COURSE: get_group_by_category_course,
+        }
+
+        get_group = grouping_strategies.get(group_by, lambda e: "Unknown")
+
+        for event in events:
+            group = get_group(event)
+            if group not in grouped_events:
+                grouped_events[group] = []
+            grouped_events[group].append(event)
 
         return grouped_events
+
+    async def _save_remembered_strips(self, remembered_strips: list[str]) -> None:
+        """Save remembered strips to the config entry."""
+        data = self._entry.data.copy()
+        data[REMEMBERED_STRIPS] = remembered_strips
+        self.hass.config_entries.async_update_entry(self._entry, data=data)
 
 
 @dataclass

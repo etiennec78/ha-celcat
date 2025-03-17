@@ -4,11 +4,24 @@
 
 ### Calendars 📅
 - **Single Calendar**: Contains all events fetched from Celcat Calendar.
-- **Calendars by course**: One calendar per course (disabled by default).
+- **Grouped Calendars**: One calendar per course, category, or both (disabled by default).
 
 ## Installation 🚀
 
-### Option 1: Install via HACS (Recommended) 🛒
+### Option 1: Install manually via HACS (Recommended) 🛒
+
+1. Make sure you have [HACS](https://hacs.xyz/) installed in Home Assistant.
+2. Go to your HACS dashboard.
+3. Click on the three dots in the upper-right corner.
+4. Select `Custom repositories`.
+5. Enter `etiennec78/ha-celcat` as the repository and `integration` as type.
+6. Press `ADD`.
+7. Search for `Celcat Calendar` in HACS and select it.
+8. Press `DOWNLOAD` in the bottom right corner.
+9. Restart Home Assistant.
+10. [Configure](https://my.home-assistant.io/redirect/config_flow_start/?domain=celcat_calendar) the integration through the UI.
+
+### Option 2: Install via HACS (Not yet available) 🛒
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=etiennec78&repository=ha-celcat&category=integration)
 
@@ -17,7 +30,7 @@
 3. Restart Home Assistant.
 4. [Configure](https://my.home-assistant.io/redirect/config_flow_start/?domain=celcat_calendar) the integration through the UI.
 
-### Option 2: Manual Installation 📖
+### Option 3: Manual Installation 📖
 
 1. Create the `custom_components` directory inside your Home Assistant configuration directory.
 2. Copy the `custom_components/celcat_calendar` folder into `custom_components`.
@@ -40,9 +53,12 @@ Celcat Calenddar is configured via the UI. See [the HA docs](https://www.home-as
 ## Customization Options ⚙️
 
 You may edit options like:
-- **Scan Interval**: Adjust how frequently events are updated.
-- **Holidays Inclusion**: Decide whether to include holidays in the calendar.
-- **Event Grouping**: Group events for better organization and colors.
+- **Scan interval**: Adjust how frequently events are updated.
+- **Holidays inclusion**: Decide whether to include holidays in the calendar.
+- **Titles & descriptions components**: Choose which attributes to include in your event descriptions.
+- **Event grouping**: Group events into multiple calendars for better organization.
+- **Data filters**: Standardize data fetched from Celcat.
+- **Course name replacements**: Manually override course names.
 
 ### How to Edit Options:
 
@@ -51,18 +67,31 @@ You may edit options like:
 3. Next to your calendar, click on `CONFIGURE`.
 4. Edit the options and click on `SUBMIT`.
 
+### Available Filters 🧹
 
-### Hide Duplicate Events (with Event Grouping) 😶‍🌫️
+Data filters can be useful if Celcat contains non-standardized data.
 
-When event grouping is enabled, the main calendar remains for automation purposes.
-To avoid seeing duplicate events in the UI, it is recommend to hide the main calendar:
+For example, raw data may contain different names for the same course which makes grouping ineffective.
 
-1. Go to **Settings > Devices & Services**.
-2. Click on the `[Celcat Calendar](https://my.home-assistant.io/redirect/integration/?domain=celcat_calendar)` integration.
-3. Click on `"X" entities`.
-4. Click on the main calendar (it should be at the top).
-5. Select the settings cog in the upper-right corner.
-6. Toggle off the `Visible` option.
+| Filter | Description | Example |
+| :---: | :--- | :--- |
+| Title case | Capitalize only the first letter of each word | MATHS CLASS -> Maths Class |
+| Remove modules | Remove modules from courses names | Maths [DPAMAT2D] -> Maths |
+| Remove category | Remove category from course names | Maths CM -> Maths |
+| Remove punctuation | Remove ".,:;!?" from text | Math. -> Math |
+| Group similar courses | Search for all event names and group ones containing another | Maths, Maths S1 -> Maths |
+| Remove redundant parts | Extract parts removed by the previous filter and remove them from all other courses | Physics S1 -> Physics |
+| Remove text after number | Remove all text after the first number found | Room 403 32 seats -> Room 403 |
+| Remove duplicates | Remove duplicates from the list | Building A, Building A -> Building A |
+
+### Course name replacements 🔄
+
+In case filters couldn't standardize all course names, you can set manual replacements.
+
+To do so, enter source:output combinations to manually replace course names.
+
+Example: `Math Class:Maths` will replace all "Math Class" courses by "Maths".
+
 
 ## Consider supporting ? 🩷
 

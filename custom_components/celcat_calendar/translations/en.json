@@ -22,6 +22,25 @@
           "password": "Password"
         }
       },
+      "options": {
+        "title": "Celcat Calendar Options",
+        "description": "Set additional options for {name}",
+        "data": {
+          "scan_interval": "Scan interval (hours)",
+          "show_holidays": "Show holidays",
+          "title": "Event title composition",
+          "description": "Event description composition",
+          "group_by": "Event grouping",
+          "filters": "Data filters",
+          "replacements": "Course name replacements"
+        },
+        "data_description": {
+          "title": "Attributes to include in event titles",
+          "description": "Attributes to include in event descriptions",
+          "filters": "Data filters can be useful if Celcat contains non-standardized data.\nFor example, raw data may contain different names for the same course which makes grouping ineffective.",
+          "replacements": "In case filters couldn't standardize all course names, you can set manual replacements.\nExample: `Math Class:Maths` will replace all 'Math Class' courses by 'Maths'."
+        }
+      },
       "reauth_confirm": {
         "title": "Authentication expired for {name}",
         "description": "The Celcat Calendar integration needs to re-authenticate your account",
@@ -30,7 +49,7 @@
         }
       },
       "reconfigure": {
-        "title": "[%key:config::step::user::title%]",
+        "title": "Celcat Calendar",
         "description": "Reconfigure your Celcat Calendar",
         "data": {
           "name": "Calendar name",
@@ -41,34 +60,84 @@
       }
     }
   },
-  "entity": {
-    "calendar": {
-      "celcat_calendar": {
-        "state_attributes": {
-          "events": {
-            "state": {
-              "faculty": "Faculty",
-              "notes": "Notes",
-              "professor": "Professor",
-              "professors": "Professors",
-              "room": "Room",
-              "rooms": "Rooms",
-              "site": "Site",
-              "sites": "Sites"
-            }
-          }
+  "options": {
+    "error": {
+      "invalid_replacements_value": "Invalid replacements value"
+    },
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scan interval (hours)",
+          "show_holidays": "Show holidays",
+          "title": "Event title composition",
+          "description": "Event description composition",
+          "group_by": "Event grouping",
+          "filters": "Data filters",
+          "replacements": "Course name replacements"
+        },
+        "data_description": {
+          "title": "Attributes to include in event titles",
+          "description": "Attributes to include in event descriptions",
+          "filters": "Data filters can be useful if Celcat contains non-standardized data.\nFor example, raw data may contain different names for the same course which makes grouping ineffective.",
+          "replacements": "In case filters couldn't standardize all course names, you can set manual replacements.\nExample: `Math Class:Maths` will replace all 'Math Class' courses by 'Maths'."
         }
       }
     }
   },
-  "options": {
-    "step": {
-      "init": {
-        "data": {
-          "scan_interval": "Scan Interval (hours)",
-          "show_holidays": "Show holidays",
-          "group_events": "Group events"
-        }
+  "selector": {
+    "title": {
+      "options": {
+        "category": "Category",
+        "course": "Course",
+        "department": "Department",
+        "faculty": "Faculty",
+        "id": "ID",
+        "module": "Module",
+        "modules": "Modules",
+        "notes": "Notes",
+        "professor": "Professor",
+        "professors": "Professors",
+        "room": "Room",
+        "rooms": "Rooms",
+        "site": "Site",
+        "sites": "Sites"
+      }
+    },
+    "description": {
+      "options": {
+        "category": "Category",
+        "course": "Course",
+        "department": "Department",
+        "faculty": "Faculty",
+        "id": "ID",
+        "modules": "Modules",
+        "notes": "Notes",
+        "professors": "Professors",
+        "rooms": "Rooms",
+        "sites": "Sites"
+      }
+    },
+    "group_by": {
+      "options": {
+        "off": "One calendar for all",
+        "course": "Group by course",
+        "category": "Group by category",
+        "category_course": "Group by category and course"
+      }
+    },
+    "filters": {
+      "options": {
+        "course_title": "Courses: Title case",
+        "course_strip_modules": "Courses: Remove modules",
+        "course_strip_category": "Courses: Remove category",
+        "course_strip_punctuation": "Courses: Remove punctuation",
+        "course_group_similar": "Courses: Group similar courses",
+        "course_strip_redundant": "Courses: Remove redundant parts",
+        "professors_title": "Professors: Title case",
+        "rooms_title": "Rooms: Title case",
+        "rooms_strip_after_number": "Rooms: Remove text after number",
+        "sites_title": "Sites: Title case",
+        "sites_remove_duplicates": "Sites: Remove duplicates"
       }
     }
   },

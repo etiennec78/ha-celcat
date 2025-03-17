@@ -2,22 +2,57 @@
 
 from __future__ import annotations
 
-from celcat_scraper import CelcatConfig, CelcatScraperAsync
+import logging
 
-from homeassistant.const import Platform, CONF_PASSWORD, CONF_URL, CONF_USERNAME
+from celcat_scraper import (
+    CelcatConfig,
+    CelcatFilterConfig,
+    CelcatScraperAsync,
+    FilterType,
+)
+
+from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, CONF_SHOW_HOLIDAYS, DEFAULT_SHOW_HOLIDAYS
-from .coordinator import CelcatDataUpdateCoordinator, CelcatData, CelcatConfigEntry
+from .const import (
+    CONF_FILTERS,
+    CONF_REPLACEMENTS,
+    CONF_SHOW_HOLIDAYS,
+    DEFAULT_FILTERS,
+    DEFAULT_REPLACEMENTS,
+    DEFAULT_SHOW_HOLIDAYS,
+    DOMAIN,
+    REMEMBERED_STRIPS,
+)
+from .coordinator import CelcatConfigEntry, CelcatData, CelcatDataUpdateCoordinator
 from .store import CelcatStore
+from .util import list_to_dict
 
 PLATFORMS: list[Platform] = [Platform.CALENDAR]
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: CelcatConfigEntry) -> bool:
     """Set up Celcat Calendar from a config entry."""
     hass.data.setdefault(DOMAIN, {})
+
+    filter_types = []
+    for filter_string in entry.options.get(CONF_FILTERS, DEFAULT_FILTERS):
+        try:
+            filter_types.append(FilterType(filter_string))
+        except ValueError:
+            _LOGGER.warning("Ignoring invalid filter: %s", filter_string)
+
+    replacements = await list_to_dict(
+        entry.options.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
+    )
+    filter_config = CelcatFilterConfig(
+        filters=filter_types,
+        course_remembered_strips=entry.data.get(REMEMBERED_STRIPS, []),
+        course_replacements=replacements,
+    )
 
     celcat = CelcatScraperAsync(
         CelcatConfig(
@@ -29,6 +64,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: CelcatConfigEntry) -> bo
             ),
             rate_limit=0.1,
             session=async_get_clientsession(hass),
+            filter_config=filter_config,
         )
     )
 

@@ -5,14 +5,15 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from celcat_scraper import (
-    CelcatConfig,
-    CelcatScraperAsync,
-    CelcatCannotConnectError,
-    CelcatInvalidAuthError,
-)
-
 import voluptuous as vol
+
+from celcat_scraper import (
+    CelcatCannotConnectError,
+    CelcatConfig,
+    CelcatInvalidAuthError,
+    CelcatScraperAsync,
+    FilterType,
+)
 
 from homeassistant.config_entries import (
     ConfigEntry,
@@ -22,25 +23,44 @@ from homeassistant.config_entries import (
 )
 from homeassistant.const import (
     CONF_NAME,
-    CONF_URL,
-    CONF_USERNAME,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
+    CONF_URL,
+    CONF_USERNAME,
 )
 from homeassistant.core import callback
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.selector import BooleanSelector
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.selector import (
+    BooleanSelector,
+    SelectSelector,
+    SelectSelectorConfig,
+)
 
 from .const import (
-    DOMAIN,
-    DEFAULT_NAME,
-    DEFAULT_SCAN_INTERVAL,
+    ATTRIBUTES,
+    CONF_DESCRIPTION,
+    CONF_FILTERS,
+    CONF_GROUP_BY,
+    CONF_REPLACEMENTS,
     CONF_SHOW_HOLIDAYS,
-    CONF_GROUP_EVENTS,
+    CONF_TITLE,
+    DEFAULT_DESCRIPTION,
+    DEFAULT_FILTERS,
+    DEFAULT_GROUP_BY,
+    DEFAULT_NAME,
+    DEFAULT_REPLACEMENTS,
+    DEFAULT_SCAN_INTERVAL,
     DEFAULT_SHOW_HOLIDAYS,
-    DEFAULT_GROUP_EVENTS,
+    DEFAULT_TITLE,
+    DOMAIN,
+    GROUP_BY_CATEGORY,
+    GROUP_BY_CATEGORY_COURSE,
+    GROUP_BY_COURSE,
+    GROUP_BY_OFF,
 )
+from .util import list_to_dict
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,9 +85,45 @@ OPTIONS_SCHEMA = vol.Schema(
         vol.Optional(
             CONF_SHOW_HOLIDAYS, default=DEFAULT_SHOW_HOLIDAYS
         ): BooleanSelector(),
-        vol.Optional(
-            CONF_GROUP_EVENTS, default=DEFAULT_GROUP_EVENTS
-        ): BooleanSelector(),
+        vol.Optional(CONF_GROUP_BY, default=DEFAULT_GROUP_BY): SelectSelector(
+            SelectSelectorConfig(
+                options=[
+                    GROUP_BY_OFF,
+                    GROUP_BY_COURSE,
+                    GROUP_BY_CATEGORY,
+                    GROUP_BY_CATEGORY_COURSE,
+                ],
+                translation_key=CONF_GROUP_BY,
+            )
+        ),
+        vol.Optional(CONF_TITLE, default=DEFAULT_TITLE): SelectSelector(
+            SelectSelectorConfig(
+                options=ATTRIBUTES,
+                translation_key=CONF_TITLE,
+                multiple=True,
+            )
+        ),
+        vol.Optional(CONF_DESCRIPTION, default=DEFAULT_DESCRIPTION): SelectSelector(
+            SelectSelectorConfig(
+                options=ATTRIBUTES,
+                translation_key=CONF_DESCRIPTION,
+                multiple=True,
+            )
+        ),
+        vol.Optional(CONF_FILTERS, default=DEFAULT_FILTERS): SelectSelector(
+            SelectSelectorConfig(
+                options=[filter_type.value for filter_type in FilterType],
+                translation_key=CONF_FILTERS,
+                multiple=True,
+            )
+        ),
+        vol.Optional(CONF_REPLACEMENTS, default=DEFAULT_REPLACEMENTS): SelectSelector(
+            SelectSelectorConfig(
+                options=[],
+                multiple=True,
+                custom_value=True,
+            )
+        ),
     }
 )
 
@@ -89,12 +145,37 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
 
             if not (errors := await self._validate_input(user_input)):
-                return self.async_create_entry(
-                    title=user_input[CONF_NAME], data=user_input
-                )
+                self.data = user_input
+                return await self.async_step_options()
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        )
+
+    async def async_step_options(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle options setup."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            try:
+                await list_to_dict(
+                    user_input.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
+                )
+                return self.async_create_entry(
+                    title=self.data[CONF_NAME], data=self.data, options=user_input
+                )
+            except ValueError:
+                errors[CONF_REPLACEMENTS] = "invalid_replacements_value"
+
+        return self.async_show_form(
+            step_id="options",
+            data_schema=self.add_suggested_values_to_schema(OPTIONS_SCHEMA, {}),
+            errors=errors,
+            description_placeholders={
+                "name": self.data[CONF_NAME],
+            },
         )
 
     async def async_step_reauth(self, user_input: dict[str, Any]) -> ConfigFlowResult:
@@ -211,19 +292,79 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Manage the options."""
-        if user_input is not None:
-            self.hass.config_entries.async_update_entry(
-                self.config_entry, options=user_input
-            )
-            self.hass.async_create_task(
-                self.hass.config_entries.async_reload(self.config_entry.entry_id)
-            )
+        errors: dict[str, str] = {}
 
-            return self.async_create_entry(data=user_input)
+        if user_input is not None:
+            try:
+                await list_to_dict(
+                    user_input.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
+                )
+            except ValueError:
+                errors[CONF_REPLACEMENTS] = "invalid_replacements_value"
+
+            if not errors:
+                old_group_by = self.config_entry.options.get(
+                    CONF_GROUP_BY, DEFAULT_GROUP_BY
+                )
+                new_group_by = user_input.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
+
+                old_filters = self.config_entry.options.get(
+                    CONF_FILTERS, DEFAULT_FILTERS
+                )
+                new_filters = user_input.get(CONF_FILTERS, DEFAULT_FILTERS)
+
+                old_replacements = self.config_entry.options.get(
+                    CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS
+                )
+                new_replacements = user_input.get(
+                    CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS
+                )
+
+                filters_removed = False
+                for old_filter in old_filters:
+                    if old_filter not in new_filters:
+                        filters_removed = True
+                        break
+
+                if filters_removed:
+                    _LOGGER.info(
+                        "A data filter has been removed, resetting stored data"
+                    )
+                    store = self.config_entry.runtime_data.store
+
+                    await store.async_save([])
+
+                if (
+                    old_group_by != new_group_by
+                    or old_filters != new_filters
+                    or old_replacements != new_replacements
+                ):
+                    _LOGGER.info("Reorganizing calendar entities")
+
+                    entity_registry = er.async_get(self.hass)
+
+                    entities = er.async_entries_for_config_entry(
+                        entity_registry, self.config_entry.entry_id
+                    )
+
+                    for entity in entities:
+                        if entity.domain == "calendar":
+                            entity_registry.async_remove(entity.entity_id)
+
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry, options=user_input
+                )
+
+                self.hass.async_create_task(
+                    self.hass.config_entries.async_reload(self.config_entry.entry_id)
+                )
+
+                return self.async_create_entry(data=user_input)
 
         return self.async_show_form(
             step_id="init",
             data_schema=self.add_suggested_values_to_schema(
                 OPTIONS_SCHEMA, self.config_entry.options
             ),
+            errors=errors,
         )

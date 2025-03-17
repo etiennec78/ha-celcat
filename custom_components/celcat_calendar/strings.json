@@ -22,6 +22,25 @@
           "password": "[%key:common::config_flow::data::password%]"
         }
       },
+      "options": {
+        "title": "Celcat Calendar Options",
+        "description": "Set additional options for {name}",
+        "data": {
+          "scan_interval": "[%key:component::celcat_calendar::options::step::init::data::scan_interval%]",
+          "show_holidays": "[%key:component::celcat_calendar::options::step::init::data::show_holidays%]",
+          "title": "[%key:component::celcat_calendar::options::step::init::data::title%]",
+          "description": "[%key:component::celcat_calendar::options::step::init::data::description%]",
+          "group_by": "[%key:component::celcat_calendar::options::step::init::data::group_by%]",
+          "filters": "[%key:component::celcat_calendar::options::step::init::data::filters%]",
+          "replacements": "[%key:component::celcat_calendar::options::step::init::data::replacements%]"
+        },
+        "data_description": {
+          "title": "[%key:component::celcat_calendar::options::step::init::data_description::title%]",
+          "description": "[%key:component::celcat_calendar::options::step::init::data_description::description%]",
+          "filters": "[%key:component::celcat_calendar::options::step::init::data_description::filters%]",
+          "replacements": "[%key:component::celcat_calendar::options::step::init::data_description::replacements%]"
+        }
+      },
       "reauth_confirm": {
         "title": "[%key:common::config_flow::title::reauth%]",
         "description": "The Celcat Calendar integration needs to re-authenticate your account",
@@ -41,34 +60,84 @@
       }
     }
   },
-  "entity": {
-    "calendar": {
-      "celcat_calendar": {
-        "state_attributes": {
-          "events": {
-            "state": {
-              "faculty": "Faculty",
-              "notes": "Notes",
-              "professor": "Professor",
-              "professors": "Professors",
-              "room": "Room",
-              "rooms": "Rooms",
-              "site": "Site",
-              "sites": "Sites"
-            }
-          }
+  "options": {
+    "error": {
+      "invalid_replacements_value": "Invalid replacements value"
+    },
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scan interval (hours)",
+          "show_holidays": "Show holidays",
+          "title": "Event title composition",
+          "description": "Event description composition",
+          "group_by": "Event grouping",
+          "filters": "Data filters",
+          "replacements": "Course name replacements"
+        },
+        "data_description": {
+          "title": "Attributes to include in event titles",
+          "description": "Attributes to include in event descriptions",
+          "filters": "Data filters can be useful if Celcat contains non-standardized data.\nFor example, raw data may contain different names for the same course which makes grouping ineffective.",
+          "replacements": "In case filters couldn't standardize all course names, you can set manual replacements.\nExample: `Math Class:Maths` will replace all 'Math Class' courses by 'Maths'."
         }
       }
     }
   },
-  "options": {
-    "step": {
-      "init": {
-        "data": {
-          "scan_interval": "Scan Interval (hours)",
-          "show_holidays": "Show holidays",
-          "group_events": "Group events"
-        }
+  "selector": {
+    "title": {
+      "options": {
+        "category": "Category",
+        "course": "Course",
+        "department": "Department",
+        "faculty": "Faculty",
+        "id": "ID",
+        "module": "Module",
+        "modules": "Modules",
+        "notes": "Notes",
+        "professor": "Professor",
+        "professors": "Professors",
+        "room": "Room",
+        "rooms": "Rooms",
+        "site": "Site",
+        "sites": "Sites"
+      }
+    },
+    "description": {
+      "options": {
+        "category": "[%key:component::celcat_calendar::selector::title::options::category%]",
+        "course": "[%key:component::celcat_calendar::selector::title::options::course%]",
+        "department": "[%key:component::celcat_calendar::selector::title::options::department%]",
+        "faculty": "[%key:component::celcat_calendar::selector::title::options::faculty%]",
+        "id": "[%key:component::celcat_calendar::selector::title::options::id%]",
+        "modules": "[%key:component::celcat_calendar::selector::title::options::modules%]",
+        "notes": "[%key:component::celcat_calendar::selector::title::options::notes%]",
+        "professors": "[%key:component::celcat_calendar::selector::title::options::professors%]",
+        "rooms": "[%key:component::celcat_calendar::selector::title::options::rooms%]",
+        "sites": "[%key:component::celcat_calendar::selector::title::options::sites%]"
+      }
+    },
+    "group_by": {
+      "options": {
+        "off": "One calendar for all",
+        "course": "Group by course",
+        "category": "Group by category",
+        "category_course": "Group by category and course"
+      }
+    },
+    "filters": {
+      "options": {
+        "course_title": "Courses: Title case",
+        "course_strip_modules": "Courses: Remove modules",
+        "course_strip_category": "Courses: Remove category",
+        "course_strip_punctuation": "Courses: Remove punctuation",
+        "course_group_similar": "Courses: Group similar courses",
+        "course_strip_redundant": "Courses: Remove redundant parts",
+        "professors_title": "Professors: Title case",
+        "rooms_title": "Rooms: Title case",
+        "rooms_strip_after_number": "Rooms: Remove text after number",
+        "sites_title": "Sites: Title case",
+        "sites_remove_duplicates": "Sites: Remove duplicates"
       }
     }
   },
