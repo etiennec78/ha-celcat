@@ -22,6 +22,21 @@
           "password": "Password"
         }
       },
+      "options": {
+        "title": "Celcat Calendar Options",
+        "description": "Set additional options for {name}",
+        "data": {
+          "scan_interval": "Scan interval (hours)",
+          "show_holidays": "Show holidays",
+          "group_by": "Event grouping",
+          "filters": "Data filters",
+          "replacements": "Course name replacements"
+        },
+        "data_description": {
+          "filters": "Data filters can be useful if Celcat contains non-standardized data.\nFor example, raw data may contain different names for the same course which makes grouping ineffective.",
+          "replacements": "In case filters couldn't standardize all course names, you can set manual replacements.\nExample: `Math Class:Maths` will replace all 'Math Class' courses by 'Maths'."
+        }
+      },
       "reauth_confirm": {
         "title": "Authentication expired for {name}",
         "description": "The Celcat Calendar integration needs to re-authenticate your account",
@@ -73,6 +88,10 @@
           "group_by": "Event grouping",
           "filters": "Data filters",
           "replacements": "Course name replacements"
+        },
+        "data_description": {
+          "filters": "Data filters can be useful if Celcat contains non-standardized data.\nFor example, raw data may contain different names for the same course which makes grouping ineffective.",
+          "replacements": "In case filters couldn't standardize all course names, you can set manual replacements.\nExample: `Math Class:Maths` will replace all 'Math Class' courses by 'Maths'."
         }
       }
     }
