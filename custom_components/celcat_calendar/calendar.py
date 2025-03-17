@@ -15,7 +15,14 @@ from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import dt as dt_util
 
 from . import CelcatConfigEntry
-from .const import DOMAIN
+from .const import (
+    ATTRIBUTES_SINGULAR,
+    CONF_DESCRIPTION,
+    CONF_TITLE,
+    DEFAULT_DESCRIPTION,
+    DEFAULT_TITLE,
+    DOMAIN,
+)
 from .coordinator import CelcatDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,9 +37,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data.coordinator
 
     entities = [
-        CelcatCalendarEntity(
-            coordinator=coordinator, entry_id=entry.entry_id, category=category
-        )
+        CelcatCalendarEntity(coordinator=coordinator, entry=entry, category=category)
         for category in coordinator.data
     ]
 
@@ -50,19 +55,20 @@ class CelcatCalendarEntity(CalendarEntity):
     def __init__(
         self,
         coordinator: CelcatDataUpdateCoordinator,
-        entry_id: str,
+        entry: CelcatConfigEntry,
         category: str,
     ) -> None:
         """Initialize Celcat."""
         self.coordinator = coordinator
+        self.entry = entry
         self._attr_unique_id = (
-            entry_id + (f"-{category}" if category != "all" else "") + "-calendar"
+            entry.entry_id + (f"-{category}" if category != "all" else "") + "-calendar"
         )
         self._attr_has_entity_name = True
         self._attr_name = None if category == "all" else category
         self._attr_device_info = DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,
-            identifiers={(DOMAIN, entry_id)},
+            identifiers={(DOMAIN, entry.entry_id)},
             manufacturer="Celcat",
         )
         self._attr_entity_registry_visible_default = (
@@ -76,14 +82,14 @@ class CelcatCalendarEntity(CalendarEntity):
         self.translations = await async_get_translations(
             self.hass,
             self.hass.config.language,
-            category="entity",
+            category="selector",
             integrations=[DOMAIN],
         )
 
     def _get_translation(self, key: str) -> str:
         """Get translation with fallback to English."""
         return self.translations.get(
-            f"component.{DOMAIN}.entity.calendar.{DOMAIN}.state_attributes.events.state.{key}",
+            f"component.{DOMAIN}.selector.title.options.{key}",
             key.capitalize(),
         )
 
@@ -139,48 +145,56 @@ class CelcatCalendarEntity(CalendarEntity):
 
     def _get_calendar_event(self, event: dict[str, Any]) -> CalendarEvent:
         """Return a CalendarEvent from an API event."""
-        description_parts = []
-        if event.get("rooms"):
-            key = "rooms" if len(event["rooms"]) > 1 else "room"
-            description_parts.append(
-                f"{self._get_translation(key)}: {', '.join(event['rooms'])}"
-            )
-        if event.get("professors"):
-            key = "professors" if len(event["professors"]) > 1 else "professor"
-            description_parts.append(
-                f"{self._get_translation(key)}: {', '.join(professor.split()[0] for professor in event['professors'])}"
-            )
-        if event.get("sites"):
-            key = "sites" if len(event["sites"]) > 1 else "site"
-            description_parts.append(
-                f"{self._get_translation(key)}: {', '.join(event['sites'])}"
-            )
-        if event.get("faculty"):
-            description_parts.append(
-                f"{self._get_translation('faculty')}: {event['faculty']}"
-            )
-        if event.get("notes"):
-            description_parts.append(
-                f"{self._get_translation('notes')}: {event['notes']}"
-            )
+        title_parts = self._assemble_attributes(
+            event,
+            self.entry.options.get(
+                CONF_TITLE,
+                DEFAULT_TITLE,
+            ),
+            include_names=False,
+        )
 
-        if event.get("course") and event.get("category"):
-            summary = f"{event['category']} {event['course']}"
-        elif event.get("course"):
-            summary = event["course"]
-        elif event.get("category"):
-            summary = event["category"]
-        else:
-            summary = "Unknown event"
+        description_parts = self._assemble_attributes(
+            event,
+            self.entry.options.get(
+                CONF_DESCRIPTION,
+                DEFAULT_DESCRIPTION,
+            ),
+            include_names=True,
+        )
 
         start = event["start"].date() if event["all_day"] else event["start"]
         end = event["end"].date() if event["all_day"] else event["end"]
 
         return CalendarEvent(
-            summary=summary,
+            summary=" ".join(title_parts),
             start=start,
             end=end,
             description=", ".join(description_parts),
             uid=event["id"],
             location=", ".join(event.get("sites", [])),
         )
+
+    def _assemble_attributes(self, event: dict[str, Any], attributes: list[str], include_names: bool) -> list[str]:
+        parts = []
+        for attribute in attributes:
+            if event.get(attribute):
+                if (
+                    type(event[attribute]) == list
+                    and len(event[attribute]) == 1
+                    and attribute in ATTRIBUTES_SINGULAR
+                ):
+                    key = ATTRIBUTES_SINGULAR[attribute]
+                else:
+                    key = attribute
+
+                prefix = f"{self._get_translation(key)}: " if include_names else ""
+                if type(event[attribute]) == list:
+                    parts.append(f"{prefix}{', '.join(event[attribute])}")
+                else:
+                    parts.append(f"{prefix}{event[attribute]}")
+
+        if not parts:
+            parts = ["Unknown"]
+
+        return parts

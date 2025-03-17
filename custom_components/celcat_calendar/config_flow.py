@@ -39,16 +39,21 @@ from homeassistant.helpers.selector import (
 )
 
 from .const import (
+    ATTRIBUTES,
+    CONF_DESCRIPTION,
     CONF_FILTERS,
     CONF_GROUP_BY,
     CONF_REPLACEMENTS,
     CONF_SHOW_HOLIDAYS,
+    CONF_TITLE,
+    DEFAULT_DESCRIPTION,
     DEFAULT_FILTERS,
     DEFAULT_GROUP_BY,
     DEFAULT_NAME,
     DEFAULT_REPLACEMENTS,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SHOW_HOLIDAYS,
+    DEFAULT_TITLE,
     DOMAIN,
     GROUP_BY_CATEGORY,
     GROUP_BY_CATEGORY_COURSE,
@@ -89,6 +94,20 @@ OPTIONS_SCHEMA = vol.Schema(
                     GROUP_BY_CATEGORY_COURSE,
                 ],
                 translation_key=CONF_GROUP_BY,
+            )
+        ),
+        vol.Optional(CONF_TITLE, default=DEFAULT_TITLE): SelectSelector(
+            SelectSelectorConfig(
+                options=ATTRIBUTES,
+                translation_key=CONF_TITLE,
+                multiple=True,
+            )
+        ),
+        vol.Optional(CONF_DESCRIPTION, default=DEFAULT_DESCRIPTION): SelectSelector(
+            SelectSelectorConfig(
+                options=ATTRIBUTES,
+                translation_key=CONF_DESCRIPTION,
+                multiple=True,
             )
         ),
         vol.Optional(CONF_FILTERS, default=DEFAULT_FILTERS): SelectSelector(
@@ -145,18 +164,14 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
                     user_input.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
                 )
                 return self.async_create_entry(
-                    title=self.data[CONF_NAME],
-                    data=self.data,
-                    options=user_input
+                    title=self.data[CONF_NAME], data=self.data, options=user_input
                 )
             except ValueError:
                 errors[CONF_REPLACEMENTS] = "invalid_replacements_value"
 
         return self.async_show_form(
             step_id="options",
-            data_schema=self.add_suggested_values_to_schema(
-                OPTIONS_SCHEMA, {}
-            ),
+            data_schema=self.add_suggested_values_to_schema(OPTIONS_SCHEMA, {}),
             errors=errors,
             description_placeholders={
                 "name": self.data[CONF_NAME],
