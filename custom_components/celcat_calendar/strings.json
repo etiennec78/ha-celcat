@@ -22,6 +22,21 @@
           "password": "[%key:common::config_flow::data::password%]"
         }
       },
+      "options": {
+        "title": "Celcat Calendar Options",
+        "description": "Set additional options for {name}",
+        "data": {
+          "scan_interval": "[%key:component::celcat_calendar::config::step::options::data::scan_interval%]",
+          "show_holidays": "[%key:component::celcat_calendar::config::step::options::data::show_holidays%]",
+          "group_by": "[%key:component::celcat_calendar::options::step::init::data::group_by%]",
+          "filters": "[%key:component::celcat_calendar::options::step::init::data::filters%]",
+          "replacements": "[%key:component::celcat_calendar::options::step::init::data::replacements%]"
+        },
+        "data_description": {
+          "filters": "[%key:component::celcat_calendar::options::step::init::data_description::filters%]",
+          "replacements": "[%key:component::celcat_calendar::options::step::init::data_description::replacements%]"
+        }
+      },
       "reauth_confirm": {
         "title": "[%key:common::config_flow::title::reauth%]",
         "description": "The Celcat Calendar integration needs to re-authenticate your account",
