@@ -126,12 +126,41 @@ class CelcatConfigFlow(ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
 
             if not (errors := await self._validate_input(user_input)):
-                return self.async_create_entry(
-                    title=user_input[CONF_NAME], data=user_input
-                )
+                self.data = user_input
+                return await self.async_step_options()
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        )
+
+    async def async_step_options(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle options setup."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            try:
+                await list_to_dict(
+                    user_input.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
+                )
+                return self.async_create_entry(
+                    title=self.data[CONF_NAME],
+                    data=self.data,
+                    options=user_input
+                )
+            except ValueError:
+                errors[CONF_REPLACEMENTS] = "invalid_replacements_value"
+
+        return self.async_show_form(
+            step_id="options",
+            data_schema=self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA, {}
+            ),
+            errors=errors,
+            description_placeholders={
+                "name": self.data[CONF_NAME],
+            },
         )
 
     async def async_step_reauth(self, user_input: dict[str, Any]) -> ConfigFlowResult:
