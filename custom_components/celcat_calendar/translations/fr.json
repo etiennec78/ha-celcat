@@ -42,7 +42,7 @@
         }
       },
       "reauth_confirm": {
-        "title": "Reconnectez-vous à Celcat Calendar",
+        "title": "Authentification expirée pour {name}",
         "description": "L'intégration Celcat Calendar a besoin de ré-authentifier votre compte",
         "data": {
           "password": "Mot de passe"
