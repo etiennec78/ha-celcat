@@ -334,6 +334,15 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
 
                     await store.async_save([])
 
+                elif (FilterType.COURSE_GROUP_SIMILAR.value in old_filters
+                    and FilterType.COURSE_STRIP_REDUNDANT.value not in old_filters
+                    and FilterType.COURSE_STRIP_REDUNDANT.value in new_filters):
+
+                    _LOGGER.info("Strip redundant filter was added after grouping filter. Resetting stored data to find strips")
+                    store = self.config_entry.runtime_data.store
+
+                    await store.async_save([])
+
                 if (
                     old_group_by != new_group_by
                     or old_filters != new_filters
