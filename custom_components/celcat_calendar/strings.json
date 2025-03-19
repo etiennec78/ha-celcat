@@ -100,7 +100,8 @@
         "room": "Room",
         "rooms": "Rooms",
         "site": "Site",
-        "sites": "Sites"
+        "sites": "Sites",
+        "unknown": "Unknown"
       }
     },
     "description": {

@@ -19,6 +19,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
@@ -37,6 +38,7 @@ from .const import (
     REMEMBERED_STRIPS,
 )
 from .store import CelcatStore
+from .util import get_translation
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -134,11 +136,19 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
         if group_by == GROUP_BY_OFF:
             return grouped_events
 
+        translations = await async_get_translations(
+            self.hass,
+            self.hass.config.language,
+            category="selector",
+            integrations=[DOMAIN],
+        )
+        unknown_title = get_translation(translations, "unknown")
+
         def get_group_by_course(event: dict[str, Any]) -> str:
-            return event.get("course") or "Unknown"
+            return event.get("course") or unknown_title
 
         def get_group_by_category(event: dict[str, Any]) -> str:
-            return event.get("category") or "Unknown"
+            return event.get("category") or unknown_title
 
         def get_group_by_category_course(event: dict[str, Any]) -> str:
             category = event.get("category", "")
@@ -150,7 +160,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
                 return category
             elif course:
                 return course
-            return "Unknown"
+            return unknown_title
 
         grouping_strategies = {
             GROUP_BY_COURSE: get_group_by_course,
@@ -158,7 +168,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             GROUP_BY_CATEGORY_COURSE: get_group_by_category_course,
         }
 
-        get_group = grouping_strategies.get(group_by, lambda e: "Unknown")
+        get_group = grouping_strategies.get(group_by, lambda e: unknown_title)
 
         for event in events:
             group = get_group(event)
