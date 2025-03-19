@@ -292,88 +292,116 @@ class OptionsFlowHandler(OptionsFlowWithConfigEntry):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Manage the options."""
-        errors: dict[str, str] = {}
-
         if user_input is not None:
-            try:
-                await list_to_dict(
-                    user_input.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
-                )
-            except ValueError:
-                errors[CONF_REPLACEMENTS] = "invalid_replacements_value"
+            errors = await self._validate_options(user_input)
 
             if not errors:
-                old_group_by = self.config_entry.options.get(
-                    CONF_GROUP_BY, DEFAULT_GROUP_BY
-                )
-                new_group_by = user_input.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
-
-                old_filters = self.config_entry.options.get(
-                    CONF_FILTERS, DEFAULT_FILTERS
-                )
-                new_filters = user_input.get(CONF_FILTERS, DEFAULT_FILTERS)
-
-                old_replacements = self.config_entry.options.get(
-                    CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS
-                )
-                new_replacements = user_input.get(
-                    CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS
-                )
-
-                filters_removed = False
-                for old_filter in old_filters:
-                    if old_filter not in new_filters:
-                        filters_removed = True
-                        break
-
-                if filters_removed:
-                    _LOGGER.info(
-                        "A data filter has been removed, resetting stored data"
-                    )
-                    store = self.config_entry.runtime_data.store
-
-                    await store.async_save([])
-
-                elif (FilterType.COURSE_GROUP_SIMILAR.value in old_filters
-                    and FilterType.COURSE_STRIP_REDUNDANT.value not in old_filters
-                    and FilterType.COURSE_STRIP_REDUNDANT.value in new_filters):
-
-                    _LOGGER.info("Strip redundant filter was added after grouping filter. Resetting stored data to find strips")
-                    store = self.config_entry.runtime_data.store
-
-                    await store.async_save([])
-
-                if (
-                    old_group_by != new_group_by
-                    or old_filters != new_filters
-                    or old_replacements != new_replacements
-                ):
-                    _LOGGER.info("Reorganizing calendar entities")
-
-                    entity_registry = er.async_get(self.hass)
-
-                    entities = er.async_entries_for_config_entry(
-                        entity_registry, self.config_entry.entry_id
-                    )
-
-                    for entity in entities:
-                        if entity.domain == "calendar":
-                            entity_registry.async_remove(entity.entity_id)
-
-                self.hass.config_entries.async_update_entry(
-                    self.config_entry, options=user_input
-                )
-
-                self.hass.async_create_task(
-                    self.hass.config_entries.async_reload(self.config_entry.entry_id)
-                )
-
+                await self._handle_option_changes(user_input)
                 return self.async_create_entry(data=user_input)
+
+            return self.async_show_form(
+                step_id="init",
+                data_schema=self.add_suggested_values_to_schema(
+                    OPTIONS_SCHEMA, user_input
+                ),
+                errors=errors,
+            )
 
         return self.async_show_form(
             step_id="init",
             data_schema=self.add_suggested_values_to_schema(
                 OPTIONS_SCHEMA, self.config_entry.options
             ),
-            errors=errors,
+            errors={},
         )
+
+    async def _validate_options(self, user_input: dict[str, Any]) -> dict[str, str]:
+        """Validate the provided options."""
+        errors: dict[str, str] = {}
+
+        try:
+            await list_to_dict(user_input.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS))
+        except ValueError:
+            errors[CONF_REPLACEMENTS] = "invalid_replacements_value"
+
+        return errors
+
+    async def _handle_option_changes(self, user_input: dict[str, Any]) -> None:
+        """Handle the changes in options."""
+        old_options = self.config_entry.options
+
+        if await self._should_reset_data(old_options, user_input):
+            await self._reset_stored_data()
+
+        if await self._should_reorganize_entities(old_options, user_input):
+            await self._reorganize_calendar_entities()
+
+        self.hass.config_entries.async_update_entry(
+            self.config_entry, options=user_input
+        )
+
+        self.hass.async_create_task(
+            self.hass.config_entries.async_reload(self.config_entry.entry_id)
+        )
+
+    async def _should_reset_data(
+        self, old_options: dict[str, Any], new_options: dict[str, Any]
+    ) -> bool:
+        """Determine if stored data should be reset."""
+        old_filters = old_options.get(CONF_FILTERS, DEFAULT_FILTERS)
+        new_filters = new_options.get(CONF_FILTERS, DEFAULT_FILTERS)
+
+        for old_filter in old_filters:
+            if old_filter not in new_filters:
+                _LOGGER.info("A data filter has been removed, resetting stored data")
+                return True
+
+        if (
+            FilterType.COURSE_GROUP_SIMILAR.value in old_filters
+            and FilterType.COURSE_STRIP_REDUNDANT.value not in old_filters
+            and FilterType.COURSE_STRIP_REDUNDANT.value in new_filters
+        ):
+            _LOGGER.info(
+                "Strip redundant filter was added after grouping filter. "
+                "Resetting stored data to find strips"
+            )
+            return True
+
+        return False
+
+    async def _reset_stored_data(self) -> None:
+        """Reset the stored data."""
+        store = self.config_entry.runtime_data.store
+        await store.async_save([])
+
+    async def _should_reorganize_entities(
+        self, old_options: dict[str, Any], new_options: dict[str, Any]
+    ) -> bool:
+        """Determine if calendar entities should be reorganized."""
+        old_group_by = old_options.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
+        new_group_by = new_options.get(CONF_GROUP_BY, DEFAULT_GROUP_BY)
+
+        old_filters = old_options.get(CONF_FILTERS, DEFAULT_FILTERS)
+        new_filters = new_options.get(CONF_FILTERS, DEFAULT_FILTERS)
+
+        old_replacements = old_options.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
+        new_replacements = new_options.get(CONF_REPLACEMENTS, DEFAULT_REPLACEMENTS)
+
+        return (
+            old_group_by != new_group_by
+            or old_filters != new_filters
+            or old_replacements != new_replacements
+        )
+
+    async def _reorganize_calendar_entities(self) -> None:
+        """Remove and recreate calendar entities."""
+        _LOGGER.info("Reorganizing calendar entities")
+
+        entity_registry = er.async_get(self.hass)
+        entities = er.async_entries_for_config_entry(
+            entity_registry, self.config_entry.entry_id
+        )
+
+        for entity in entities:
+            if entity.domain == "calendar":
+                entity_registry.async_remove(entity.entity_id)

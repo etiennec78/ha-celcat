@@ -64,9 +64,9 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
         data = entry.runtime_data
         self.hass = hass
         self.celcat: CelcatScraperAsync = data.client
-        self._store: CelcatStore = data.store
+        self.store: CelcatStore = data.store
         self.options = entry.options
-        self._entry = entry
+        self.entry = entry
 
     async def _async_update_data(self) -> list[dict]:
         """Update data via library."""
@@ -89,7 +89,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
 
         async with async_timeout.timeout(180):
             # Load existing data from the local store
-            local_data = await self._store.async_load()
+            local_data = await self.store.async_load()
             if local_data:
                 for event in local_data:
                     if isinstance(event["start"], str):
@@ -113,7 +113,7 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
             await self._save_remembered_strips(
                 self.celcat.config.filter_config.course_remembered_strips
             )
-            await self._store.async_save(events)
+            await self.store.async_save(events)
 
             tz_events = [
                 {
@@ -180,9 +180,9 @@ class CelcatDataUpdateCoordinator(DataUpdateCoordinator[list[dict]]):
 
     async def _save_remembered_strips(self, remembered_strips: list[str]) -> None:
         """Save remembered strips to the config entry."""
-        data = self._entry.data.copy()
+        data = self.entry.data.copy()
         data[REMEMBERED_STRIPS] = remembered_strips
-        self.hass.config_entries.async_update_entry(self._entry, data=data)
+        self.hass.config_entries.async_update_entry(self.entry, data=data)
 
 
 @dataclass
