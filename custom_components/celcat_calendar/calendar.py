@@ -24,6 +24,7 @@ from .const import (
     DOMAIN,
 )
 from .coordinator import CelcatDataUpdateCoordinator
+from .util import get_translation
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,15 +37,18 @@ async def async_setup_entry(
     """Set up the celcat calendar platform."""
     coordinator = entry.runtime_data.coordinator
 
+    translations = await async_get_translations(
+        hass,
+        hass.config.language,
+        category="selector",
+        integrations=[DOMAIN],
+    )
+
     entities = [
-        CelcatCalendarEntity(coordinator=coordinator, entry=entry, category=category)
+        CelcatCalendarEntity(coordinator, entry, category, translations)
         for category in coordinator.data
     ]
-
     async_add_entities(entities, True)
-
-    for entity in entities:
-        await entity.async_init_translations()
 
 
 class CelcatCalendarEntity(CalendarEntity):
@@ -57,6 +61,7 @@ class CelcatCalendarEntity(CalendarEntity):
         coordinator: CelcatDataUpdateCoordinator,
         entry: CelcatConfigEntry,
         category: str,
+        translations: dict[str, str],
     ) -> None:
         """Initialize Celcat."""
         self.coordinator = coordinator
@@ -75,23 +80,7 @@ class CelcatCalendarEntity(CalendarEntity):
             len(coordinator.data) == 1 or category != "all"
         )
         self.category = category
-        self.translations = {}
-
-    async def async_init_translations(self) -> None:
-        """Initialize translations."""
-        self.translations = await async_get_translations(
-            self.hass,
-            self.hass.config.language,
-            category="selector",
-            integrations=[DOMAIN],
-        )
-
-    def _get_translation(self, key: str) -> str:
-        """Get translation with fallback to English."""
-        return self.translations.get(
-            f"component.{DOMAIN}.selector.title.options.{key}",
-            key.capitalize(),
-        )
+        self.translations = translations
 
     @property
     def event(self) -> CalendarEvent | None:
@@ -175,7 +164,9 @@ class CelcatCalendarEntity(CalendarEntity):
             location=", ".join(event.get("sites", [])),
         )
 
-    def _assemble_attributes(self, event: dict[str, Any], attributes: list[str], include_names: bool) -> list[str]:
+    def _assemble_attributes(
+        self, event: dict[str, Any], attributes: list[str], include_names: bool
+    ) -> list[str]:
         parts = []
         for attribute in attributes:
             if event.get(attribute):
@@ -188,7 +179,11 @@ class CelcatCalendarEntity(CalendarEntity):
                 else:
                     key = attribute
 
-                prefix = f"{self._get_translation(key)}: " if include_names else ""
+                prefix = (
+                    f"{get_translation(self.translations, key)}: "
+                    if include_names
+                    else ""
+                )
                 if type(event[attribute]) == list:
                     parts.append(f"{prefix}{', '.join(event[attribute])}")
                 else:
