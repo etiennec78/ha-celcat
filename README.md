@@ -8,20 +8,7 @@
 
 ## Installation 🚀
 
-### Option 1: Install manually via HACS (Recommended) 🛒
-
-1. Make sure you have [HACS](https://hacs.xyz/) installed in Home Assistant.
-2. Go to your HACS dashboard.
-3. Click on the three dots in the upper-right corner.
-4. Select `Custom repositories`.
-5. Enter `etiennec78/ha-celcat` as the repository and `integration` as type.
-6. Press `ADD`.
-7. Search for `Celcat Calendar` in HACS and select it.
-8. Press `DOWNLOAD` in the bottom right corner.
-9. Restart Home Assistant.
-10. [Configure](https://my.home-assistant.io/redirect/config_flow_start/?domain=celcat_calendar) the integration through the UI.
-
-### Option 2: Install via HACS (Not yet available) 🛒
+### Option 1: Install via HACS (Recommended) 🛒
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=etiennec78&repository=ha-celcat&category=integration)
 
@@ -30,7 +17,7 @@
 3. Restart Home Assistant.
 4. [Configure](https://my.home-assistant.io/redirect/config_flow_start/?domain=celcat_calendar) the integration through the UI.
 
-### Option 3: Manual Installation 📖
+### Option 2: Manual Installation 📖
 
 1. Create the `custom_components` directory inside your Home Assistant configuration directory.
 2. Copy the `custom_components/celcat_calendar` folder into `custom_components`.
